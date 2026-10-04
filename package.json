@@ -1,0 +1,16 @@
+{
+  "name": "janpon-verification-foundation",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "scripts": {
+    "build": "node tools/build.mjs",
+    "test": "node --test tests/foundation/*.test.mjs"
+  },
+  "devDependencies": {
+    "typescript": "5.9.3"
+  }
+}
