@@ -5,14 +5,14 @@ import { startBundle } from '../helpers/browser-harness.mjs';
 
 // Post-trial UI regression tests, not part of the historical stage8 add-only proof.
 // The packaged DOM and CSS source are inspected; pixel/device QA remains NOT_RUN.
-test('outer settings form one text-free group after the cabinet, outside every play target', async t => {
+test('apron settings form one text-free group inside the red cabinet, outside the white face and play targets', async t => {
   const ui = await startBundle(); t.after(() => ui.close());
-  const shell = ui.document.querySelector('.game-shell');
   const groups = ui.document.querySelectorAll('.settings-controls');
   assert.equal(groups.length, 1);
   const group = groups[0];
-  assert.equal(group.parentElement, shell);
-  assert.deepEqual(shell.children, [ui.machine, group]);
+  assert.equal(group.parentElement, ui.machine);
+  assert.equal(ui.machine.children.at(-1), group);
+  assert.ok(ui.machine.children.indexOf(ui.document.querySelector('.face')) < ui.machine.children.indexOf(group));
   assert.equal(group.getAttribute('role'), 'group');
   assert.equal(group.getAttribute('aria-label'), '音と動きの設定');
   assert.equal(group.textContent, '');
@@ -20,7 +20,8 @@ test('outer settings form one text-free group after the cabinet, outside every p
   for (const id of ['audio-toggle', 'motion-toggle']) {
     const button = ui.ids.get(id);
     assert.equal(button.parentElement, group);
-    assert.equal(button.closest('.machine, .face, .controls, #coin-input'), null);
+    assert.equal(button.closest('.machine'), ui.machine);
+    assert.equal(button.closest('.face, .controls, #coin-input'), null);
     assert.equal(button.localName, 'button'); assert.equal(button.type, 'button');
     assert.equal(button.getAttribute('aria-keyshortcuts'), 'Enter Space');
     assert.ok(button.getAttribute('aria-label'));
@@ -30,15 +31,18 @@ test('outer settings form one text-free group after the cabinet, outside every p
   assert.match(ui.ids.get('state-symbol').innerHTML, /<svg/);
 });
 
-test('outer settings use responsive normal flow with 44px controls and cabinet separation', async () => {
+test('apron settings use responsive flow, large physical rocker targets, distinct states and visible focus', async () => {
   const css = await readFile('game/style.css', 'utf8');
   const group = css.match(/\.settings-controls\{([^}]+)\}/)?.[1];
   assert.ok(group); assert.match(group, /display:flex/); assert.match(group, /flex-wrap:wrap/);
-  assert.match(group, /margin-top:28px/); assert.match(group, /gap:12px/);
+  assert.match(group, /margin-top:20px/); assert.match(group, /gap:16px/);
   assert.doesNotMatch(group, /position:|transform:|margin-top:-/);
-  assert.match(css, /\.game-shell\{width:min\(100%,430px\)\}/);
-  assert.match(css, /@media\(max-height:650px\) and \(min-width:500px\)\{body\{padding:20px\}\.game-shell\{width:355px\}/);
-  assert.match(css, /\.settings-controls \.tool\{width:44px;height:44px;min-width:44px\}/);
+  assert.match(css, /\.machine\{position:relative;width:min\(100%,430px\)/);
+  assert.match(css, /\.settings-controls \.tool\{width:54px;height:58px;min-width:54px;flex-shrink:0/);
+  assert.match(css, /\.settings-controls \.tool::before\{display:block;[^}]*box-shadow:[^}]*rotateX\(-10deg\)/);
+  assert.match(css, /\.settings-controls \.tool\[aria-pressed="true"\]::before\{[^}]*rotateX\(10deg\)/);
+  assert.match(css, /\.settings-controls \.tool\[aria-pressed="true"\]::after\{[^}]*background:#ffd77a/);
+  assert.match(css, /\.settings-controls \.tool:focus-visible\{outline:3px solid #fff0b8;outline-offset:4px\}/);
 });
 
 for (const key of ['Enter', ' ']) test(`outer settings preserve single activation for held ${JSON.stringify(key)}`, async t => {
