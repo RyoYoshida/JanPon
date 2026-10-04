@@ -58,7 +58,7 @@ test('source geometry keeps the hand local with an approximate glow envelope and
   assert.match(css,/\.display\{[^}]*border:4px/);
   assert.match(css,/\.state-indicator\{[^}]*width:66%;height:60%/);
   assert.match(css,/\.state-indicator\{[^}]*filter:drop-shadow\(0 0 3px #edb04b33\)/);
-  assert.match(css,/\.center-cycle \.center-hand,\.center-result-hand\{transform:translate\(62px,20px\) scale\(1\.05\)\}/);
+  assert.match(css,/\.center-cycle \.center-hand,\.center-result-hand\{transform:translate\(var\(--hand-x\),var\(--hand-y\)\) scale\(1\.05\)\}/);
   const displayContent=430-4-40-4-40-14-8;
   const handCanvas=95*1.05*(displayContent*.66/220);
   assert.equal(displayContent,320); assert.ok(Math.abs(handCanvas-95.76)<.000001);

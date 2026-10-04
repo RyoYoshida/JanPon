@@ -197,7 +197,7 @@ test('central CSS retains slow waiting and static reduced fallbacks while sharin
   assert.ok(durations.length >= 9); assert.ok(durations.every(({name,ms}) => ms === 480 ? /^center-(rock|scissors|paper)-cycle$/.test(name) : ms >= 1800));
   assert.match(css,/\.machine\[data-motion="reduced"\] \.center-scene \*\{animation:none!important\}/);
   assert.match(css,/@media\(prefers-reduced-motion:reduce\)/);
-  for (const shape of ['scissors','paper']) assert.match(css,new RegExp(`data-motion="reduced"[^}]+center-${shape}\\{transform:translate`));
+  assert.match(css,/data-motion="reduced"[^}]+transform:translate\(var\(--trio-x\),var\(--trio-y\)\) scale\(\.72\)/);
   assert.match(css,/\.machine h1::before[\s\S]*inset: -10px -17px -12px/);
   assert.match(css,/\.machine \.face\s*\{[\s\S]*linear-gradient\(112deg, #f6ebc5, #ecdcad/);
   for (const selector of ['.machine::before,','.machine header::before,','.machine h1::before,','.machine .face::before']) {

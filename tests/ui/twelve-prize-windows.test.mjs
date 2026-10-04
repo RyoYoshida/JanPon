@@ -36,7 +36,7 @@ test('approved physical ring has twelve upright numbered windows, clockwise from
   assert.match(shell,/<\/div><\/div>\s*<div class="controls"/,'no legend wrapper or placeholder gap');
   assert.doesNotMatch(shell+css,/class="key"|\.key(?:\s|\{|\bspan)|配当ランプの色/);
   assert.match(css,/\.window-number\{[^}]*font:900 32px/);
-  assert.match(css,/\.lamp\.active \.window-face\{[^}]*fill:currentColor[^}]*stroke-width:2\.5/);
+  assert.match(css,/\.lamp\.active \.window-face\{[^}]*fill:#2e362a[^}]*stroke-width:2\.5/);
   assert.match(css,/#prize\{[^}]*bottom:23%/);
   assert.match(css,/\.state-controls\{[^}]*top:54%/);
   // At smallest supported 320px source geometry, digits scale to 17.6px;

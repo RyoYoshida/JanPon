@@ -53,7 +53,7 @@ export function centralScene(scene: CenterScene, view: GameView | null): string 
   if (scene === 'choosing' || scene === 'draw-ready') content = trio('center-cycle');
   if (['draw', 'win', 'loss', 'roulette'].includes(scene) && view?.result) {
     content = hand(view.result.opponent, 'center-result-hand');
-    if (scene === 'roulette') content += '<circle class="center-orbit" cx="110" cy="72" r="62" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="14 18"/>';
+    if (scene === 'roulette') content += '<circle class="center-orbit" cx="110" cy="100" r="62" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="14 18"/>';
   }
   if (scene === 'payout') content = '<g class="center-coins"><ellipse cx="110" cy="65" rx="29" ry="11"/><path d="M81 65v20c0 15 58 15 58 0V65M81 75c0 15 58 15 58 0M81 85c0 15 58 15 58 0"/></g>';
   const notice: Partial<Record<CenterScene, CenterIcon>> = { loading: 'hourglass', saving: 'hourglass', 'game-over': 'flag', stopped: 'saveError', 'other-tab': 'tabs', closed: 'blocked' };

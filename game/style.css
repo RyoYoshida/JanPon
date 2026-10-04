@@ -26,9 +26,9 @@ button svg{position:relative;width:58%;height:58%;overflow:visible;filter:drop-s
 /* Live cabinet: the approved twelve prize windows are presentation, not odds. */
 .display{aspect-ratio:1}
 .lamp .window-face{fill:url(#window-glass);stroke:#5b4933;stroke-width:1.4}
-.window-number{fill:#493320;stroke:#f2dfaa;stroke-width:.65;paint-order:stroke fill;font:900 32px/1 Arial,Helvetica,sans-serif;pointer-events:none}
-.lamp.active .window-face{fill:currentColor;stroke:#fff4c8;stroke-width:2.5;filter:drop-shadow(0 0 4px currentColor)}
-.lamp.active .window-number{fill:#211b12;stroke:#fff4cf;stroke-width:1.1}
+.window-number{fill:currentColor;stroke:#141c14;stroke-width:.8;paint-order:stroke fill;font:900 32px/1 Arial,Helvetica,sans-serif;pointer-events:none}
+.lamp.active .window-face{fill:#2e362a;stroke:#fff4c8;stroke-width:2.5;filter:drop-shadow(0 0 4px currentColor)}
+.lamp.active .window-number{fill:currentColor;stroke:#141c14;stroke-width:.8}
 #prize{position:absolute;left:0;right:0;bottom:23%;min-height:1em;text-align:center;color:#f579ae;font:700 clamp(22px,6vw,34px)/1 monospace;letter-spacing:2px;text-shadow:0 0 10px #ef5d9e77;z-index:1}
 .controls{margin-top:23px}.controls button{cursor:pointer}.controls button:disabled{opacity:.62;filter:saturate(.65);cursor:default}.controls button:focus-visible{outline:3px solid #182820;outline-offset:5px}.controls button:active:not(:disabled){transform:translateY(2px)}
 .controls button[aria-pressed="true"]{outline:2px solid #6e4e2d;outline-offset:4px}
@@ -36,7 +36,7 @@ button svg{position:relative;width:58%;height:58%;overflow:visible;filter:drop-s
 .sr-only{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
 [hidden]{display:none!important}.tool{width:40px;height:40px;min-width:40px;aspect-ratio:1;border-radius:50%;background:#f8e7b7;box-shadow:0 2px 0 #94684855;border:1px solid #b18d5e;color:#684b30;cursor:pointer}.tool::before{display:none}.tool svg{width:24px;height:24px;filter:none}.tool:focus-visible{outline:3px solid #a9782b;outline-offset:3px}.tool:disabled{opacity:.28;cursor:default}
 .state-controls{position:absolute;left:50%;top:54%;transform:translateX(-50%);display:flex;align-items:center;gap:10px;z-index:2}.state-controls svg{width:100%;height:100%}.state-controls .tool svg{width:24px;height:24px}
-.state-indicator{position:absolute;left:50%;top:49%;width:66%;height:60%;transform:translate(-50%,-50%);color:#ffc369;filter:drop-shadow(0 0 3px #edb04b33);pointer-events:none}.state-indicator svg{width:100%;height:100%}.display.problem{box-shadow:inset 0 0 25px #862c1633}
+.state-indicator{position:absolute;left:50%;top:50%;width:66%;height:60%;transform:translate(-50%,-50%);color:#ffc369;filter:drop-shadow(0 0 3px #edb04b33);pointer-events:none}.state-indicator svg{width:100%;height:100%}.display.problem{box-shadow:inset 0 0 25px #862c1633}
 /* Coin-only activation: the padded native button preserves the approved art position. */
 button.wallet{width:max-content;max-width:100%;min-width:120px;min-height:56px;height:auto;aspect-ratio:auto;display:flex;justify-content:flex-end;align-items:center;gap:8px;margin:11px -12px -12px auto;padding:12px;border:0;border-radius:12px;background:transparent;box-shadow:none;color:inherit;cursor:pointer}
 button.wallet::before{display:none}button.wallet:disabled{opacity:1;cursor:default}button.wallet svg{position:static;width:32px;height:32px;filter:none}button.wallet:focus-visible{outline:3px solid #a9782b;outline-offset:2px}
@@ -57,7 +57,11 @@ button.wallet::before{display:none}button.wallet:disabled{opacity:1;cursor:defau
 /* Central LED scenes: decorative cycles never schedule or advance a game action. */
 .center-scene{display:block;width:100%;height:100%;overflow:visible}
 .center-hand{transform-origin:0 0}
-.center-cycle .center-hand,.center-result-hand{transform:translate(62px,20px) scale(1.05)}
+/* Center the actual mask bounds, not the transparent95px LED canvas. */
+.center-hand[data-center-hand="rock"]{--hand-x:59.6px;--hand-y:52.225px;--trio-x:9.86px;--trio-y:67.24px}
+.center-hand[data-center-hand="scissors"]{--hand-x:55.3475px;--hand-y:53.485px;--trio-x:69.068px;--trio-y:68.104px}
+.center-hand[data-center-hand="paper"]{--hand-x:66.74px;--hand-y:51.7px;--trio-x:142.46px;--trio-y:66.88px}
+.center-cycle .center-hand,.center-result-hand{transform:translate(var(--hand-x),var(--hand-y)) scale(1.05)}
 .center-cycle .center-hand{opacity:0}
 .center-cycle .center-rock{opacity:1}
 .center-coins{fill:none;stroke:currentColor;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
@@ -84,14 +88,10 @@ button.wallet::before{display:none}button.wallet:disabled{opacity:1;cursor:defau
 @keyframes center-orbit{to{transform:rotate(360deg)}}
 /* Every reduced-motion state has a stationary, shape-distinct equivalent. */
 .machine[data-motion="reduced"] .center-scene *{animation:none!important}
-.machine[data-motion="reduced"] .center-cycle .center-hand{opacity:1;transform:translate(3px,43px) scale(.72)}
-.machine[data-motion="reduced"] .center-cycle .center-scissors{transform:translate(77px,43px) scale(.72)}
-.machine[data-motion="reduced"] .center-cycle .center-paper{transform:translate(151px,43px) scale(.72)}
+.machine[data-motion="reduced"] .center-cycle .center-hand{opacity:1;transform:translate(var(--trio-x),var(--trio-y)) scale(.72)}
 @media(prefers-reduced-motion:reduce){
   .machine:not([data-motion="standard"]) .center-scene *{animation:none!important}
-  .machine:not([data-motion="standard"]) .center-cycle .center-hand{opacity:1;transform:translate(3px,43px) scale(.72)}
-  .machine:not([data-motion="standard"]) .center-cycle .center-scissors{transform:translate(77px,43px) scale(.72)}
-  .machine:not([data-motion="standard"]) .center-cycle .center-paper{transform:translate(151px,43px) scale(.72)}
+  .machine:not([data-motion="standard"]) .center-cycle .center-hand{opacity:1;transform:translate(var(--trio-x),var(--trio-y)) scale(.72)}
 }
 /* Physical finish only: preserve cabinet geometry, controls and game state styling. */
 .machine {

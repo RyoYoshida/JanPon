@@ -13,11 +13,11 @@ const sha = text => createHash('sha256').update(text).digest('hex');
 
 // Baseline hand-only SVG/CSS with guidance removed.
 // The hand group, masks and keyframes retain the original waiting art.
-test('liked waiting hand art, keyframes and reduced-motion layout remain unchanged after guidance removal', async () => {
+test('liked waiting hand art and animation keyframes remain unchanged after approved centering', async () => {
   assert.equal(sha(centralScene('waiting',idle)),'d4a744bfdf819fe268b771ef63989f16e5cd5d0daf989e703b2e29d986e52a5a');
   const css=await readFile('game/style.css','utf8');
-  const protectedLines=css.split('\n').filter(line=>line.includes('[data-scene="waiting"]')||line.startsWith('@keyframes center-rock-cycle')||line.startsWith('@keyframes center-scissors-cycle')||line.startsWith('@keyframes center-paper-cycle')||line.includes('data-motion=')||line.includes('@media(prefers-reduced-motion:reduce)')||line.startsWith('.center-cycle'));
-  assert.equal(sha(protectedLines.join('\n')),'753bf7e43a960c87fcb59471fb2889e38b435a34629676d03a294fda3473d608');
+  const protectedLines=css.split('\n').filter(line=>line.includes('[data-scene="waiting"]')||line.startsWith('@keyframes center-rock-cycle')||line.startsWith('@keyframes center-scissors-cycle')||line.startsWith('@keyframes center-paper-cycle')||line.includes('.center-scene *{animation:none!important}')||line.includes('@media(prefers-reduced-motion:reduce)')||line.startsWith('.center-cycle .center-hand{opacity:')||line.startsWith('.center-cycle .center-rock{opacity:'));
+  assert.equal(sha(protectedLines.join('\n')),'bb6650725843f8f7f1b390e5426cf62e64039800c6addcf3f691f82d57f191d0');
 });
 
 test('choosing and draw-ready share the complete waiting SVG and identical keyframes, with only 10x period difference', async () => {
