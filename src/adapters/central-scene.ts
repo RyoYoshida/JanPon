@@ -1,4 +1,4 @@
-import { SPEC } from '../spec.ts';
+import { EFFECTS, SPEC } from '../spec.ts';
 import type { AppStatus, GameView, Hand } from '../core/game-contracts.ts';
 
 /** Visual-only scene names. These are not stored phases or gameplay state. */
@@ -38,15 +38,16 @@ function trio(className: string): string {
 export function sceneFor(view: GameView | null, status: AppStatus): CenterScene {
   if (status === 'stopped' || status === 'other-tab' || status === 'closed') return status;
   if (!view || status === 'new') return 'loading';
-  if (status === 'busy') return 'saving';
   if (view.phase === 'game-over') return 'game-over';
   if (view.phase === 'idle') return 'waiting';
   if (view.phase === 'choosing') return view.result?.outcome === 'draw' ? 'draw-ready' : 'choosing';
   return view.result?.outcome ?? 'loading';
 }
 
-/** Pure markup from the public view: no RNG, stored opponent, payout or scheduling access. */
+/** Pure markup from the committed public view: no RNG, hidden state, writes or scheduling. */
 export function centralScene(scene: CenterScene, view: GameView | null): string {
+  // Retain the exported legacy scene name as a normal-scene alias, never a save glyph.
+  if (scene === 'saving') scene = sceneFor(view, 'ready');
   const masks = SPEC.hands.map(value => `<mask id="center-${value}"><path d="${handPaths[value][0]}" fill="white"/><path d="${handPaths[value][1]}" fill="none" stroke="black" stroke-width="3" stroke-linecap="round"/></mask>`).join('');
   let content = '';
   if (scene === 'waiting') content = trio('center-cycle');
@@ -55,11 +56,19 @@ export function centralScene(scene: CenterScene, view: GameView | null): string 
     content = hand(view.result.opponent, 'center-result-hand');
     if (scene === 'roulette') content += '<circle class="center-orbit" cx="110" cy="100" r="62" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="14 18"/>';
   }
-  if (scene === 'payout') content = '<g class="center-coins"><ellipse cx="110" cy="65" rx="29" ry="11"/><path d="M81 65v20c0 15 58 15 58 0V65M81 75c0 15 58 15 58 0M81 85c0 15 58 15 58 0"/></g>';
-  const notice: Partial<Record<CenterScene, CenterIcon>> = { loading: 'hourglass', saving: 'hourglass', 'game-over': 'flag', stopped: 'saveError', 'other-tab': 'tabs', closed: 'blocked' };
+  if (scene === 'payout') {
+    const amount = view?.result?.payout ?? 0;
+    const duration = EFFECTS.payoutDurationMs[amount as keyof typeof EFFECTS.payoutDurationMs];
+    const flight = amount === 1 ? duration : EFFECTS.coinFlightMs;
+    const coins = duration ? Array.from({ length: amount }, (_, index) => {
+      const delay = amount === 1 ? 0 : (duration - flight) * index / (amount - 1);
+      return `<g class="center-ejected-coin" style="--coin-flight:${flight}ms;--coin-delay:${delay}ms"><ellipse cx="110" cy="103" rx="14" ry="5"/><path d="M96 103v5c0 7 28 7 28 0v-5"/></g>`;
+    }).join('') : '';
+    content = `<g class="center-coins"><ellipse cx="110" cy="65" rx="29" ry="11"/><path d="M81 65v20c0 15 58 15 58 0V65M81 75c0 15 58 15 58 0M81 85c0 15 58 15 58 0"/>${coins}</g>`;
+  }
+  const notice: Partial<Record<CenterScene, CenterIcon>> = { loading: 'hourglass', 'game-over': 'flag', stopped: 'saveError', 'other-tab': 'tabs', closed: 'blocked' };
   const noticeIcon = notice[scene];
   if (noticeIcon) content = `<g class="center-notice" transform="translate(78 38) scale(2)">${iconPath(noticeIcon)}</g>`;
-  if (scene === 'loading' || scene === 'saving') content += '<g class="center-progress"><circle cx="94" cy="135" r="3"/><circle cx="110" cy="135" r="3"/><circle cx="126" cy="135" r="3"/></g>';
-  if (scene === 'saving') content += '<path d="M76 153h68" stroke="currentColor" stroke-width="2"/>';
+  if (scene === 'loading') content += '<g class="center-progress"><circle cx="94" cy="135" r="3"/><circle cx="110" cy="135" r="3"/><circle cx="126" cy="135" r="3"/></g>';
   return `<svg class="center-scene" viewBox="0 0 220 200" aria-hidden="true"><defs><pattern id="center-led" width="4" height="4" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1.35" fill="currentColor"/></pattern>${masks}</defs>${content}</svg>`;
 }

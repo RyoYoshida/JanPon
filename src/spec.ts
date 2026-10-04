@@ -52,4 +52,6 @@ export const EFFECTS = {
   audioDurationSeconds: 0.12, audioGain: 0.045, audioFloor: 0.001,
   frequencies: { start: 440, draw: 330, win: 660, loss: 220, payout: 880 },
   selectedPriority: 1,
+  payoutDurationMs: { 1: 800, 2: 1000, 4: 1400, 7: 1800, 20: 3000 },
+  coinFlightMs: 600,
 } as const;

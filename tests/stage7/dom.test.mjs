@@ -114,7 +114,7 @@ test('T07-04 roulette visits lamps then lands only on the committed prize withou
     const animation = h.ui.animate(view), lit = new Set();
     do { const index = h.lamps.findIndex(l => l.classes.has('active')); if (index >= 0) lit.add(index); } while (await h.tick());
     await animation;
-    assert.ok(lit.size > 1); assert.equal(h.elapsed, 1800);
+    assert.ok(lit.size > 1); assert.equal(h.elapsed, 1350 + ({1:800,2:1000,4:1400,7:1800,20:3000})[payout]);
     assert.deepEqual(h.lamps.filter(l => l.classes.has('active')).map(l => l.dataset.value), [String(payout)]);
     assert.equal(h.ids.get('prize').textContent, String(payout)); assert.deepEqual(view, original);
     assert.equal(h.ids.get('balance').textContent, '9'); assert.ok(h.hands.every(b => b.disabled));

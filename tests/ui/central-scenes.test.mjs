@@ -25,7 +25,7 @@ async function winBundle(options = {}) {
 test('central graphics cover all public phases and operational statuses without lower-left space', async t => {
   const ui = await startBundle({ runBundle:false }); t.after(() => ui.close());
   const display = createDisplay(ui.document), seen = new Set();
-  const cases = [[null,'new','loading'],[null,'busy','loading'],[idle,'busy','saving'],[idle,'ready','waiting'],
+  const cases = [[null,'new','loading'],[null,'busy','loading'],[idle,'busy','waiting'],[idle,'ready','waiting'],
     [choosing,'ready','choosing'],[draw,'ready','draw-ready'],[win,'ready','win'],[loss,'ready','loss'],
     [over,'ready','game-over'],[win,'stopped','stopped'],[choosing,'other-tab','other-tab'],[idle,'closed','closed']];
   for (const [view,status,scene] of cases) {
@@ -38,7 +38,7 @@ test('central graphics cover all public phases and operational statuses without 
     assert.equal(ui.timers.size,0,'idle scenes must not create JS polling timers');
     if (scene !== 'loading' || !seen.has(center(ui).innerHTML)) seen.add(center(ui).innerHTML);
   }
-  assert.equal(seen.size,8,'operational notices stay distinct; normal hand scenes intentionally share artwork');
+  assert.equal(seen.size,7,'operational notices stay distinct; normal hand scenes intentionally share artwork');
   assert.equal(ui.ids.has('state-symbol'),false);
   assert.equal(ui.document.querySelector('.face > .state-controls'),null);
   for (const id of ['restart','retry']) assert.equal(ui.ids.get(id).closest('.display'),ui.display);
@@ -194,7 +194,7 @@ test('central CSS retains slow waiting and static reduced fallbacks while sharin
   assert.match(css,/center-orbit 4\.8s linear infinite/);
   assert.doesNotMatch(css,/steps\(/);
   const durations = [...css.matchAll(/animation:([\w-]+)\s+([\d.]+)(ms|s)/g)].map(([,name,value,unit]) => ({name,ms:Number(value) * (unit === 's' ? 1000 : 1)}));
-  assert.ok(durations.length >= 9); assert.ok(durations.every(({name,ms}) => ms === 300 ? /^center-(rock|scissors|paper)-cycle$/.test(name) : ms >= 1800));
+  assert.ok(durations.length >= 8); assert.ok(durations.every(({name,ms}) => ms === 300 ? /^center-(rock|scissors|paper)-cycle$/.test(name) : ms >= 1800));
   assert.match(css,/\.machine\[data-motion="reduced"\] \.center-scene \*\{animation:none!important\}/);
   assert.match(css,/@media\(prefers-reduced-motion:reduce\)/);
   assert.match(css,/data-motion="reduced"[^}]+transform:translate\(var\(--trio-x\),var\(--trio-y\)\) scale\(\.72\)/);

@@ -74,7 +74,7 @@ test('dot numeral clicks still reach the coin-only native button and payout chan
   assert.ok(ui.document.activeElement===coin);assert.equal(coin.disabled,true);
   ui.click('[data-hand="paper"]');await ui.flush();assert.equal(ui.savedState.round.result.payout,4);
   await ui.tick(1350);assert.equal(ui.ids.get('prize').textContent,'4');assert.equal(renderedValue(balance),'9');
-  await ui.tick(449);assert.equal(renderedValue(balance),'9');
+  await ui.tick(1399);assert.equal(renderedValue(balance),'9');
   await ui.tick(1);assert.equal(ui.savedState.balance,13);assert.equal(renderedValue(balance),'13');assert.equal(ui.writes,4);
   assert.equal(ui.ids.get('balance'),balance);assert.equal(ui.ids.get('coin-input'),coin);assert.equal(ui.timers.size,0);
 });

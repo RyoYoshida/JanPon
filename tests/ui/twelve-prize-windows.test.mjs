@@ -79,7 +79,7 @@ test('clockwise chase slows down continuously and takes one final adjacent step 
   assert.equal(stops.size,12);
 });
 
-test('display reveal keeps the prize hidden until1350ms and retains exactly one matching window through the450ms hold', async t => {
+test('display reveal keeps the prize hidden until1350ms and retains exactly one matching window through the prize-proportional payout hold', async t => {
   const ui=await startBundle({runBundle:false}); t.after(()=>ui.close()); const display=createDisplay(ui.document);
   for(const payout of [1,2,4,7,20]) for(let balance=0;balance<4;balance++) {
     const view={...win,balance,result:{...win.result,payout}}, expected=prizeWindow(approved,view), start=ui.elapsed;
@@ -89,8 +89,9 @@ test('display reveal keeps the prize hidden until1350ms and retains exactly one 
     await ui.tick(1349); assert.equal(ui.ids.get('prize').textContent,'');
     assert.deepEqual(lit(ui),[(expected+11)%12]);
     await ui.tick(1); assert.deepEqual(lit(ui),[expected]); assert.equal(ui.ids.get('prize').textContent,String(payout));
-    await ui.tick(449); assert.deepEqual(lit(ui),[expected]);
-    await ui.tick(1); await rendering; assert.equal(ui.elapsed-start,1800); assert.equal(ui.timers.size,0);
+    const duration=({1:800,2:1000,4:1400,7:1800,20:3000})[payout];
+    await ui.tick(duration-1); assert.deepEqual(lit(ui),[expected]);
+    await ui.tick(1); await rendering; assert.equal(ui.elapsed-start,1350+duration); assert.equal(ui.timers.size,0);
   }
 });
 

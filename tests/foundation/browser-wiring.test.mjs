@@ -33,7 +33,7 @@ test('packaged bootstrap completes the deterministic 10 → 9 → 13 first round
     assert.equal(ui.ids.get('balance').textContent, '13');
     assert.equal(ui.savedState.balance, 13);
     assert.equal(ui.writes, 4);
-    assert.equal(ui.elapsed, 1800);
+    assert.equal(ui.elapsed, 2750);
     assert.equal(ui.timers.size, 0);
   } finally { await ui.close(); }
 });

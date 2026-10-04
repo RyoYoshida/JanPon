@@ -1,4 +1,4 @@
-import { ENGINE, SPEC } from '../spec.ts';
+import { EFFECTS, ENGINE, SPEC } from '../spec.ts';
 import { presentationCue } from './presentation-cues.ts';
 import { prizeWindow, rouletteFrames } from './roulette-windows.ts';
 import { centralScene, controlIcon, sceneFor } from './central-scene.ts';
@@ -35,7 +35,7 @@ export function createDisplay(root: Document): {
   let claimed = false, choose: (index: number) => void = () => {}, retry: () => void = () => {};
   let timer: number | null = null, wake: (() => void) | null = null;
   let finishing: Promise<void> | null = null, drawing: Promise<void> | null = null;
-  let drawComplete = false, drawRequested = false;
+  let drawComplete = false, drawRequested = false, resultComplete = false;
   function cancel(): void {
     generation++;
     if (timer !== null) clock!.clearTimeout(timer);
@@ -85,7 +85,12 @@ export function createDisplay(root: Document): {
   restart.innerHTML = controlIcon('repeat'); retryButton.innerHTML = controlIcon('repeat');
 
   function render(view: GameView | null, status: AppStatus, reason: string): void {
-    cancel(); current = view; appStatus = status; claimed = false; disableInputs();
+    // A pending write is not a new scene or a new balance. Keep the last public view.
+    if (status === 'busy' && ['ready', 'busy'].includes(appStatus) && view && current && JSON.stringify(view) === JSON.stringify(current)) {
+      appStatus = status; claimed = true; disableInputs(); retryButton.disabled = true;
+      machine.dataset.waiting = 'false'; coin.setAttribute('aria-label', '現在は追加投入できません'); return;
+    }
+    cancel(); current = view; appStatus = status; claimed = false; resultComplete = false; disableInputs();
     const blocked = status === 'stopped' || status === 'other-tab' || status === 'closed';
     const ready = status === 'ready' && view !== null;
     const result = view?.result;
@@ -105,7 +110,6 @@ export function createDisplay(root: Document): {
     if (status === 'stopped') { description = '保存または復元を確認できないため停止しました。保存は消しません。再読み込みして再試行できます'; }
     if (status === 'other-tab') { description = '別のタブでプレイ中です。そのタブを閉じてから、再読み込みして再試行してください'; }
     if (status === 'closed') { description = 'ゲームを停止しました。再開するにはページを再読み込みしてください'; }
-    if (status === 'busy' && view) description += '。保存と進行を確定中です';
     if (reason) description += `。詳細: ${reason}`;
     balance.innerHTML = view ? medalDigits(view.balance) : '';
     balance.setAttribute('aria-label', view ? `メダル残高${view.balance}枚` : 'メダル残高。未確認');
@@ -146,7 +150,7 @@ export function createDisplay(root: Document): {
     if (result.outcome !== 'win') {
       await sleep(ENGINE.resultDurationMs);
       if (run !== generation) { await finishing; return; }
-      return;
+      resultComplete = true; return;
     }
     for (const frame of rouletteFrames(windowValues, view)) {
       if (run !== generation) { await finishing; return; }
@@ -154,20 +158,23 @@ export function createDisplay(root: Document): {
       await sleep(frame.duration);
     }
     if (run !== generation) { await finishing; return; }
-    revealPrize(view);
-    await sleep(ENGINE.drawDurationMs);
+    indicator.dataset.payoutMotion = 'release'; revealPrize(view);
+    await sleep(EFFECTS.payoutDurationMs[result.payout as keyof typeof EFFECTS.payoutDurationMs] ?? ENGINE.drawDurationMs);
     if (run !== generation) await finishing;
+    else { resultComplete = true; indicator.dataset.payoutMotion = 'static'; }
   }
   function finishPresentation(): Promise<void> {
     if (appStatus === 'ready' && current?.phase === 'choosing' && current.result?.outcome === 'draw') return drawing || drawRequested ? holdDraw() : Promise.resolve();
     if (finishing) return finishing;
+    if (resultComplete || appStatus !== 'ready') return Promise.resolve();
     cancel();
     if (appStatus !== 'ready' || !current?.result || current.phase !== 'result' && current.result.outcome !== 'draw') return Promise.resolve();
     if (current.result.outcome === 'win' && current.phase === 'result') {
-      revealPrize(current);
+      indicator.dataset.payoutMotion = 'static'; revealPrize(current);
     } else center(current.result.outcome);
     claimed = true; disableInputs();
-    finishing = sleep(ENGINE.drawDurationMs);
+    const run = generation;
+    finishing = sleep(ENGINE.drawDurationMs).then(() => { if (run === generation) resultComplete = true; });
     return finishing;
   }
   return { render, bind(onChoose, onRetry) { choose = onChoose; retry = onRetry; }, animate, request: activate, finishPresentation };

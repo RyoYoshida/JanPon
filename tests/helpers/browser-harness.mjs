@@ -222,7 +222,7 @@ class FakeDocument extends EventTarget {
 /** Share this object between startBundle calls to model reloads and competing tabs. */
 export function createSharedState(savedState) {
   return { durable: new Map(savedState === undefined ? [] : [['current', structuredClone(savedState)]]),
-    leases: new Map(), writes: 0, committedWrites: 0, writeLog: [], abortNext: false };
+    leases: new Map(), writes: 0, committedWrites: 0, writeLog: [], abortNext: false, holdNextWrite: false, pendingWrites: [] };
 }
 
 function createIndexedDB(shared) {
@@ -252,11 +252,13 @@ function createIndexedDB(shared) {
             put(value, key) {
               const write = { key, value: structuredClone(value), committed: false };
               shared.writes++; shared.writeLog.push(write);
-              queueMicrotask(() => {
+              const held = shared.holdNextWrite; shared.holdNextWrite = false;
+              const complete = () => {
                 if (terminal) return;
                 if (shared.abortNext) { shared.abortNext = false; finish(true); }
                 else { shared.durable.set(key, structuredClone(write.value)); write.committed = true; shared.committedWrites++; finish(false); }
-              });
+              };
+              if (held) shared.pendingWrites.push(complete); else queueMicrotask(complete);
               return {};
             },
           }; },
