@@ -52,7 +52,7 @@ export function createDisplay(root: Document): {
   function revealPrize(view: GameView): void {
     if (!view.result) return;
     const stop = prizeWindow(windowValues, view);
-    center('payout'); light(stop); prize.textContent = String(view.result.payout);
+    center('payout'); light(stop); prize.innerHTML = medalDigits(view.result.payout);
     const description = `配当${view.result.payout}枚。精算して次へ進みます。残高${view.balance}枚`;
     statusText.textContent = description; machine.setAttribute('aria-label', `JanPon。${description}`);
     ring.setAttribute('aria-label', `${description}。配当窓${lamps.length}個`);

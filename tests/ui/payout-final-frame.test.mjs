@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createDisplay } from '../../src/adapters/dom.ts';
 import { centralScene } from '../../src/adapters/central-scene.ts';
+import { medalDigits } from '../../src/adapters/medal-digits.ts';
 import { initialState } from '../../src/core/state.ts';
 import { startBundle, createSharedState } from '../helpers/browser-harness.mjs';
 
@@ -17,6 +18,12 @@ function finalFrame(ui,payout,opponent='rock') {
   assert.equal(center(ui).querySelector('.center-result-hand').dataset.centerHand,opponent);
   assert.doesNotMatch(center(ui).innerHTML,/center-cycle|center-orbit|center-coins|center-ejected-coin|center-notice|center-progress/);
   assert.equal(ui.ids.get('prize').textContent,String(payout));
+  const prize=ui.ids.get('prize'),svg=prize.querySelector('svg');
+  assert.equal(prize.innerHTML,medalDigits(payout),'payout uses the same exact dot glyphs as the wallet');
+  assert.equal(prize.querySelectorAll('[data-medal-digit]').map(node=>node.dataset.medalDigit).join(''),String(payout));
+  assert.equal(svg.getAttribute('aria-hidden'),'true');assert.equal(svg.getAttribute('focusable'),'false');
+  assert.equal(svg.getAttribute('fill'),'currentColor');
+  assert.equal(prize.style.color,ui.lamps.find(lamp=>lamp.classList.contains('active')).getAttribute('fill'));
   assert.deepEqual(ui.lamps.filter(lamp=>lamp.classList.contains('active')).map(lamp=>lamp.dataset.value),[String(payout)]);
   assert.equal(ui.ids.get('balance').textContent,'9');
   assert.equal(ui.ids.get('coin-input').disabled,true);
