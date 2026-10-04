@@ -13,8 +13,10 @@ class Element {
     this.classes = new Set((this.attributes.class ?? '').split(' '));
     this.classList = { toggle: (name, value) => value ? this.classes.add(name) : this.classes.delete(name), contains: name => this.classes.has(name) };
     this.style = {}; this.disabled = /\bdisabled\b/.test(attributes); this.hidden = /\bhidden\b/.test(attributes);
-    this.innerHTML = ''; this.textContent = ''; this.listeners = new Map();
+    this.innerHTML = ''; this.listeners = new Map();
   }
+  get innerHTML() { return this.markup; }
+  set innerHTML(value) { this.markup = value; this.textContent = value.replace(/<[^>]*>/g, ''); }
   setAttribute(name, value) { this.attributes[name] = value; }
   getAttribute(name) { return this.attributes[name] ?? null; }
   addEventListener(name, listener) { this.listeners.set(name, listener); }

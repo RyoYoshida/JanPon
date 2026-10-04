@@ -2,6 +2,7 @@ import { ENGINE, SPEC } from '../spec.ts';
 import { presentationCue } from './presentation-cues.ts';
 import { prizeWindow, rouletteFrames } from './roulette-windows.ts';
 import { centralScene, controlIcon, sceneFor } from './central-scene.ts';
+import { medalDigits } from './medal-digits.ts';
 import type { CenterScene } from './central-scene.ts';
 import type { AppStatus, Choice, GameView, Hand } from '../core/game-contracts.ts';
 
@@ -106,7 +107,7 @@ export function createDisplay(root: Document): {
     if (status === 'closed') { description = 'ゲームを停止しました。再開するにはページを再読み込みしてください'; }
     if (status === 'busy' && view) description += '。保存と進行を確定中です';
     if (reason) description += `。詳細: ${reason}`;
-    balance.textContent = view ? String(view.balance) : '';
+    balance.innerHTML = view ? medalDigits(view.balance) : '';
     balance.setAttribute('aria-label', view ? `メダル残高${view.balance}枚` : 'メダル残高。未確認');
     prize.textContent = ''; light(-1);
     center(waitingDraw ? 'draw' : sceneFor(view, status)); display.classList.toggle('problem', blocked);
