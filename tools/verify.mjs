@@ -5,6 +5,7 @@ import { createHash } from 'node:crypto';
 import { pathToFileURL } from 'node:url';
 import { performance } from 'node:perf_hooks';
 import { discover } from './discover.mjs';
+import { packageGame } from './package-game.mjs';
 import { build } from './build.mjs';
 import { architecture } from './architecture.mjs';
 import { checkGoldens } from './golden-contracts.mjs';
@@ -15,6 +16,7 @@ const mode = process.argv.includes('--complete') ? 'complete' : process.argv.inc
 const report = { mode, startedUtc:new Date().toISOString(), runtime:process.version, status:'FAIL', browser:'NOT_RUN: automated terminal checks do not run a real browser' };
 try {
  report.build = await build();
+ report.artifact = await packageGame();
  report.architecture = await architecture();
  const { registrations } = await import(pathToFileURL(resolve('dist/.generated/registrations.js')).href + `?run=${start}`);
  const manifestIssues = checkManifest(registrations);
@@ -31,9 +33,11 @@ try {
  const run = spawnSync(process.execPath,['--test','--test-reporter=tap',...tests],{encoding:'utf8',timeout:170000});
  process.stdout.write(run.stdout??''); process.stderr.write(run.stderr??'');
  if(run.error || run.status!==0) throw new Error(`Tests failed: ${run.error?.message??run.status}`);
+ report.applicationRounds = [...run.stdout.matchAll(/JANPON_ROUNDS (\{[^\n]+\})/g)].map(match=>JSON.parse(match[1]));
+ if (!report.applicationRounds.some(row=>row.completed>=10000 && row.replayed>=10000 && row.exceptions===0 && row.invariantViolations===0)) throw new Error('Missing real application round/replay evidence');
  report.testSummary = Object.fromEntries([...run.stdout.matchAll(/^# (tests|pass|fail|cancelled|skipped|todo) (\d+)$/gm)].map(m=>[m[1],Number(m[2])]));
- report.pending = registrations.map(row=>({id:row.id,axis:row.axis,tasks:row.taskIds,status:row.status}));
- report.productCompletion = 'NOT_READY: gameplay, real persistence, UI, recovery and real-device matrix not yet implemented or verified';
+ report.pending = registrations.filter(row=>row.status==='unimplemented').map(row=>({id:row.id,axis:row.axis,tasks:row.taskIds,status:row.status}));
+ report.productCompletion = 'NOT_READY: remaining registrations, real-device/recovery matrix and 100000-round completion verification pending';
  if(mode==='checkpoint') {
   const faults=spawnSync(process.execPath,['tools/fault-injection.mjs'],{encoding:'utf8',timeout:3500000});
   process.stdout.write(faults.stdout??''); process.stderr.write(faults.stderr??'');

@@ -27,7 +27,7 @@ try {
  for (const [name, mutate, expected] of faults) {
   const dir=await mkdtemp(join(tmpdir(),'janpon-fault-'));
   try {
-   for(const path of ['src','tools','tests','mock','package.json','GOAL.md']) await cp(resolve(root,path),join(dir,path),{recursive:true});
+   for(const path of ['src','tools','tests','mock','game','package.json','GOAL.md']) await cp(resolve(root,path),join(dir,path),{recursive:true});
    await symlink(resolve(root,'node_modules'),join(dir,'node_modules'),'dir');
    await mutate(dir);
    const t=performance.now();

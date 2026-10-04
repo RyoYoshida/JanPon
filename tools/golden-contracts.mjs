@@ -59,5 +59,5 @@ export async function checkGoldens(path = 'tests/golden/approved-examples.json')
  assert.throws(()=>assertAccountingFixture({...choosing,phase:'idle'}),/idle/);
  return { rows:20, payoutSlots:100, accountingFixtures:fixtures.length,
   scope:'semantic/specification and supplied-fixture invariants only',
-  productBehavior:'NOT_IMPLEMENTED: no game, persistence, settings or UI execution' };
+  productBehavior:'NOT_EXECUTED_BY_THIS_CHECK: gameplay, storage, settings and presentation have separately discovered tests' };
 }

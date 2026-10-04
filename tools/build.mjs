@@ -11,12 +11,16 @@ export async function build(root = process.cwd()) {
   await mkdir(resolve(root, '.generated'), { recursive: true });
   const imports = registrationFiles.map((p, i) => `import { registration as r${i} } from ${JSON.stringify('../' + relative(root, p).replaceAll('\\', '/'))};`);
   await writeFile(resolve(root, '.generated/registrations.ts'), `${imports.join('\n')}\nexport const registrations = [${registrationFiles.map((_, i) => `r${i}`).join(',')}];\n`);
+  const entry = resolve(root, 'src/bootstrap/main.ts');
+  const generatedEntry = resolve(root, '.generated/main.ts');
+  const entries = files.includes(entry) ? [generatedEntry] : [];
+  if (entries.length) await writeFile(generatedEntry, `import { start } from '../src/bootstrap/main.ts';\nimport { registrations } from './registrations.ts';\nvoid start(registrations);\n`);
   await rm(resolve(root, 'dist'), { recursive: true, force: true });
   const options = { strict: true, target: ts.ScriptTarget.ES2023, module: ts.ModuleKind.NodeNext,
     moduleResolution: ts.ModuleResolutionKind.NodeNext, lib: ['lib.es2023.d.ts', 'lib.dom.d.ts'],
     rootDir: root, outDir: resolve(root, 'dist'), rewriteRelativeImportExtensions: true,
     noEmitOnError: true, noUncheckedIndexedAccess: true };
-  const program = ts.createProgram([...files, resolve(root, '.generated/registrations.ts')], options);
+  const program = ts.createProgram([...files, resolve(root, '.generated/registrations.ts'), ...entries], options);
   const diagnostics = ts.getPreEmitDiagnostics(program);
   if (diagnostics.length) throw new Error(ts.formatDiagnosticsWithColorAndContext(diagnostics, {
     getCanonicalFileName: p => p, getCurrentDirectory: () => root, getNewLine: () => '\n'

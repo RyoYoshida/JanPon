@@ -39,6 +39,7 @@ export const ENGINE = {
   drawDurationMs: 450,
   lampStepMs: 45,
   seedWords: 1,
+  randomWordDomain: 4294967296,
   databaseName: 'janpon-v1',
   databaseVersion: 1,
   storeName: 'game',
