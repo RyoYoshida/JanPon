@@ -184,7 +184,7 @@ test('errors and competing tabs keep distinct central graphics and accessible no
   assert.match(second.ids.get('status').textContent,/別のタブ/);
 });
 
-test('central CSS uses slow fades with stationary reduced fallbacks; materials stay decorative', async () => {
+test('central CSS separates rapid low-contrast choices from slow waiting and static reduced fallbacks', async () => {
   const css = await readFile('game/style.css','utf8');
   const sceneSource = await readFile('src/adapters/central-scene.ts','utf8');
   assert.doesNotMatch(sceneSource,/setTimeout|setInterval|requestAnimationFrame|Math\.random|Date\.|localStorage|indexedDB/);
@@ -193,8 +193,8 @@ test('central CSS uses slow fades with stationary reduced fallbacks; materials s
   assert.match(css,/center-paper-cycle 4\.8s ease-in-out infinite/);
   assert.match(css,/center-orbit 4\.8s linear infinite/);
   assert.doesNotMatch(css,/steps\(/);
-  const durations = [...css.matchAll(/animation:[\w-]+\s+([\d.]+)(ms|s)/g)].map(([,value,unit]) => Number(value) * (unit === 's' ? 1000 : 1));
-  assert.ok(durations.length >= 10); assert.ok(durations.every(ms => ms >= 1800));
+  const durations = [...css.matchAll(/animation:([\w-]+)\s+([\d.]+)(ms|s)/g)].map(([,name,value,unit]) => ({name,ms:Number(value) * (unit === 's' ? 1000 : 1)}));
+  assert.ok(durations.length >= 10); assert.ok(durations.every(({name,ms}) => name.endsWith('-rapid') ? ms === 480 : ms >= 1800));
   assert.match(css,/\.machine\[data-motion="reduced"\] \.center-scene \*\{animation:none!important\}/);
   assert.match(css,/@media\(prefers-reduced-motion:reduce\)/);
   for (const shape of ['scissors','paper']) assert.match(css,new RegExp(`data-motion="reduced"[^}]+center-${shape}\\{transform:translate`));

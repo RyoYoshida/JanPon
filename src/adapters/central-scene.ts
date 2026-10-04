@@ -35,6 +35,9 @@ function badge(name: CenterIcon): string {
 function hand(hand: Hand, className: string): string {
   return `<g class="center-hand ${className}" data-center-hand="${hand}"><rect width="95" height="95" fill="url(#center-led)" mask="url(#center-${hand})"/></g>`;
 }
+function rapidTrio(): string {
+  return `<g class="center-cycle center-rapid-cycle"><rect class="center-backlight" width="95" height="95" fill="url(#center-led)"/>${SPEC.hands.map(value => hand(value, `center-${value}`)).join('')}</g>`;
+}
 function trio(className: string): string {
   return `<g class="${className}">${SPEC.hands.map(value => hand(value, `center-${value}`)).join('')}</g>`;
 }
@@ -53,7 +56,7 @@ export function centralScene(scene: CenterScene, view: GameView | null): string 
   const masks = SPEC.hands.map(value => `<mask id="center-${value}"><path d="${handPaths[value][0]}" fill="white"/><path d="${handPaths[value][1]}" fill="none" stroke="black" stroke-width="3" stroke-linecap="round"/></mask>`).join('');
   let content = '';
   if (scene === 'waiting') content = trio('center-cycle') + badge('coin') + '<path class="center-insert" d="m104 176 6 6 6-6" fill="none" stroke="currentColor" stroke-width="2"/>';
-  if (scene === 'choosing' || scene === 'draw-ready') content = trio('center-cycle') + badge(scene === 'draw-ready' ? 'draw' : 'hand');
+  if (scene === 'choosing' || scene === 'draw-ready') content = rapidTrio() + badge(scene === 'draw-ready' ? 'draw' : 'hand');
   if (['draw', 'win', 'loss', 'roulette'].includes(scene) && view?.result) {
     content = hand(view.result.opponent, 'center-result-hand') + badge(scene === 'roulette' ? 'win' : view.result.outcome);
     if (scene === 'roulette') content += '<circle class="center-orbit" cx="110" cy="72" r="62" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="14 18"/>';

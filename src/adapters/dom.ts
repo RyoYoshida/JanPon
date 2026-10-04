@@ -1,4 +1,5 @@
 import { ENGINE, SPEC } from '../spec.ts';
+import { presentationCue } from './presentation-cues.ts';
 import { centralScene, controlIcon, sceneFor } from './central-scene.ts';
 import type { CenterScene } from './central-scene.ts';
 import type { AppStatus, Choice, GameView, Hand } from '../core/game-contracts.ts';
@@ -30,11 +31,12 @@ export function createDisplay(root: Document): {
   let current: GameView | null = null, appStatus: AppStatus = 'new', generation = 0;
   let claimed = false, choose: (index: number) => void = () => {}, retry: () => void = () => {};
   let timer: number | null = null, wake: (() => void) | null = null;
-  let finishing: Promise<void> | null = null;
+  let finishing: Promise<void> | null = null, drawing: Promise<void> | null = null;
+  let drawComplete = false, drawRequested = false;
   function cancel(): void {
     generation++;
     if (timer !== null) clock!.clearTimeout(timer);
-    timer = null; wake?.(); wake = null; finishing = null;
+    timer = null; wake?.(); wake = null; finishing = null; drawing = null;
   }
   function sleep(duration: number): Promise<void> {
     return new Promise(resolve => { wake = resolve; timer = clock!.setTimeout(() => { timer = null; wake = null; resolve(); }, duration); });
@@ -54,7 +56,9 @@ export function createDisplay(root: Document): {
     prize.style.color = lamps[stop]?.getAttribute('fill') ?? '';
   }
   function enableHands(): void {
-    claimed = false; center('draw-ready');
+    if (machine.isConnected === false) return;
+    if (!drawComplete) presentationCue(root, 'draw-restart');
+    drawComplete = true; drawRequested = false; claimed = false; center('draw-ready');
     hands.forEach(button => { button.disabled = !current?.choices.some(choice => choice.kind === 'hand' && choice.hand === button.dataset.hand); });
   }
 
@@ -62,7 +66,7 @@ export function createDisplay(root: Document): {
     if (appStatus !== 'ready' || claimed || !current) return;
     const index = current.choices.findIndex(choice => choice.kind === expected.kind && (choice.kind !== 'hand' || expected.kind === 'hand' && choice.hand === expected.hand));
     if (index < 0) return;
-    claimed = true; disableInputs(); choose(index);
+    claimed = true; drawComplete = false; drawRequested = expected.kind === 'hand'; disableInputs(); choose(index);
   }
   function bindInput(button: HTMLButtonElement, expected: Choice): void {
     button.addEventListener('click', event => { event.stopPropagation(); if (!button.disabled) activate(expected); });
@@ -82,6 +86,8 @@ export function createDisplay(root: Document): {
     const blocked = status === 'stopped' || status === 'other-tab' || status === 'closed';
     const ready = status === 'ready' && view !== null;
     const result = view?.result;
+    if (view?.phase !== 'choosing' || result?.outcome !== 'draw') drawComplete = false;
+    const waitingDraw = ready && view.phase === 'choosing' && result?.outcome === 'draw' && drawRequested && !drawComplete;
     const inResult = result && (view?.phase === 'result' || view?.phase === 'choosing' && result.outcome === 'draw');
     let description = '保存されたゲームを確認中です';
     if (view) {
@@ -101,7 +107,7 @@ export function createDisplay(root: Document): {
     balance.textContent = view ? String(view.balance) : '';
     balance.setAttribute('aria-label', view ? `メダル残高${view.balance}枚` : 'メダル残高。未確認');
     prize.textContent = ''; light(-1);
-    center(sceneFor(view, status)); display.classList.toggle('problem', blocked);
+    center(waitingDraw ? 'draw' : sceneFor(view, status)); display.classList.toggle('problem', blocked);
     machine.dataset.phase = blocked ? status : view?.phase ?? 'loading';
     machine.dataset.outcome = inResult ? result.outcome : '';
     machine.setAttribute('aria-label', `JanPon。${description}`);
@@ -115,20 +121,28 @@ export function createDisplay(root: Document): {
     restart.setAttribute('aria-label', `はじめから。${SPEC.initialBalance}枚で新しいゲームを始める`);
     retryButton.hidden = !['stopped', 'other-tab'].includes(status); retryButton.disabled = retryButton.hidden;
     hands.forEach(button => {
-      button.disabled = !ready || !view.choices.some(choice => choice.kind === 'hand' && choice.hand === button.dataset.hand);
+      button.disabled = !ready || waitingDraw || !view.choices.some(choice => choice.kind === 'hand' && choice.hand === button.dataset.hand);
       button.setAttribute('aria-pressed', String(!!inResult && result.player === button.dataset.hand));
     });
   }
+  function holdDraw(): Promise<void> {
+    if (drawComplete) return Promise.resolve();
+    if (drawing) return drawing;
+    cancel(); const run = generation;
+    claimed = true; disableInputs(); center('draw');
+    drawing = sleep(ENGINE.drawDurationMs).then(() => {
+      if (run === generation && appStatus === 'ready' && current?.phase === 'choosing' && current.result?.outcome === 'draw') enableHands();
+    });
+    return drawing;
+  }
   async function animate(view: GameView): Promise<void> {
     if (!view.result || appStatus !== 'ready' || view.phase !== 'result' && !(view.phase === 'choosing' && view.result.outcome === 'draw')) return;
+    if (view.result.outcome === 'draw') { drawRequested = true; await holdDraw(); return; }
     cancel(); const run = generation, result = view.result;
     claimed = true; disableInputs(); center(result.outcome === 'win' ? 'roulette' : result.outcome);
     if (result.outcome !== 'win') {
-      await sleep(result.outcome === 'draw' ? ENGINE.drawDurationMs : ENGINE.resultDurationMs);
+      await sleep(ENGINE.resultDurationMs);
       if (run !== generation) { await finishing; return; }
-      if (result.outcome === 'draw') {
-        enableHands();
-      }
       return;
     }
     let step = 0;
@@ -143,6 +157,7 @@ export function createDisplay(root: Document): {
     if (run !== generation) await finishing;
   }
   function finishPresentation(): Promise<void> {
+    if (appStatus === 'ready' && current?.phase === 'choosing' && current.result?.outcome === 'draw') return drawing || drawRequested ? holdDraw() : Promise.resolve();
     if (finishing) return finishing;
     cancel();
     if (appStatus !== 'ready' || !current?.result || current.phase !== 'result' && current.result.outcome !== 'draw') return Promise.resolve();
@@ -150,10 +165,7 @@ export function createDisplay(root: Document): {
       revealPrize(current);
     } else center(current.result.outcome);
     claimed = true; disableInputs();
-    const run = generation;
-    finishing = sleep(ENGINE.drawDurationMs).then(() => {
-      if (run === generation && current?.result?.outcome === 'draw' && current.phase === 'choosing') enableHands();
-    });
+    finishing = sleep(ENGINE.drawDurationMs);
     return finishing;
   }
   return { render, bind(onChoose, onRetry) { choose = onChoose; retry = onRetry; }, animate, request: activate, finishPresentation };

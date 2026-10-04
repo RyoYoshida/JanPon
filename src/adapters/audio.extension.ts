@@ -2,6 +2,7 @@ import { EFFECTS, SPEC } from '../spec.ts';
 import type { GameView, Output } from '../core/game-contracts.ts';
 import type { BrowserHost } from './browser-contracts.ts';
 import { settingsControls } from './settings-controls.ts';
+import { listenPresentationCue } from './presentation-cues.ts';
 
 type Sound = keyof typeof EFFECTS.frequencies;
 interface Tone { oscillator: OscillatorNode; gain: GainNode }
@@ -46,7 +47,8 @@ export function createAudioOutput(host: BrowserHost): Output & { dispose(): void
     } catch { resuming = false; }
   }
   function play(sound: Sound): void {
-    if (muted || disposed || !context || context.state !== 'running') return;
+    if (muted || disposed || host.document.hidden || !host.document.querySelector('.machine')?.isConnected || !context || context.state !== 'running') return;
+    silence();
     let oscillator: OscillatorNode | null = null, gain: GainNode | null = null, tone: Tone | null = null;
     try {
       oscillator = context.createOscillator(); gain = context.createGain();
@@ -71,12 +73,16 @@ export function createAudioOutput(host: BrowserHost): Output & { dispose(): void
     if (muted) silence();
     show();
   }
+  const removeCue = listenPresentationCue(host.document, () => play('draw'));
+  function visibilityChanged(): void { if (host.document.hidden) silence(); }
+  host.document.addEventListener('visibilitychange', visibilityChanged);
   const activations = ['pointerdown', 'keydown', 'click'];
   for (const name of activations) host.document.addEventListener(name, activate, { capture: true });
   button.addEventListener('click', toggle);
   function dispose(): void {
     if (disposed) return;
-    disposed = true; silence();
+    disposed = true; silence(); removeCue();
+    host.document.removeEventListener('visibilitychange', visibilityChanged);
     for (const name of activations) host.document.removeEventListener(name, activate, { capture: true });
     button.removeEventListener('click', toggle); button.remove();
     host.window.removeEventListener('pagehide', dispose);
@@ -89,7 +95,7 @@ export function createAudioOutput(host: BrowserHost): Output & { dispose(): void
     emit(event): void {
       const view = event.view, before = previous; previous = view;
       if (view.phase === 'choosing') {
-        if (view.result?.outcome === 'draw') play('draw');
+        if (view.result?.outcome === 'draw') silence(); // The shared hold completion supplies the restart cue.
         else if (!view.result) play('start');
       } else if (view.phase === 'result' && view.result) play(view.result.outcome);
       else if (view.phase === 'idle' && before?.phase === 'result' && before.result?.outcome === 'win') play('payout');
