@@ -34,7 +34,7 @@ export function checkManifest(entries: readonly Registration[]): readonly string
     seen.add(key);
     if (!expected.has(key)) issues.push(`extra:${key}`);
     if (!Number.isSafeInteger(entry.priority)) issues.push(`priority:${key}`);
-    if (entry.status !== 'unimplemented' || !entry.taskIds.length || entry.taskIds.some(id => !/^T\d+-\d+$/.test(id))) issues.push(`status:${key}`);
+    if (!['unimplemented', 'minimal'].includes(entry.status) || (entry.status === 'minimal' && entry.implementation === undefined) || !entry.taskIds.length || entry.taskIds.some(id => !/^T\d+-\d+$/.test(id))) issues.push(`status:${key}`);
   }
   for (const key of expected) if (!seen.has(key)) issues.push(`missing:${key}`);
   return issues.sort();

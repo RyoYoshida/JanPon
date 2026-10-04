@@ -31,7 +31,7 @@ test('spec constants match independently approved GOAL values', () => {
   assert.deepEqual(SPEC.theoreticalReturn, { numerator: 100, denominator: 100 });
 });
 
-test('six provisional axes are discoverable and remain explicitly unimplemented', async () => {
+test('six provisional axes are discoverable with honest connection status', async () => {
   const found = await registrations();
   assert.deepEqual(AXIS_MANIFEST.map(x => [x.axis, x.mode, [...x.ids]]), [
     ['A1', 'collect', ['pointer', 'keyboard']], ['A2', 'select', ['uniform-opponent']],
@@ -41,12 +41,12 @@ test('six provisional axes are discoverable and remain explicitly unimplemented'
   assert.match(MANIFEST_AUTHORITY, /provisional/);
   assert.equal(found.length, 9);
   assert.deepEqual(checkManifest(found), []);
-  for (const row of found) { assert.equal(row.status, 'unimplemented'); assert.ok(row.taskIds.length); }
+  for (const row of found) { assert.ok(['unimplemented','minimal'].includes(row.status)); if(row.status==='minimal')assert.ok(row.implementation); assert.ok(row.taskIds.length); }
   assert.deepEqual(checkManifest(found.filter(x => x.id !== 'pointer')), ['missing:A1:pointer']);
   assert.deepEqual(checkManifest([...found, { ...found[0], axis: 'A7', id: 'extra' }]), ['extra:A7:extra']);
   assert.deepEqual(checkManifest([...found, found[0]]), [`duplicate:${found[0].axis}:${found[0].id}`]);
   const statusIssues = found.map(x => `status:${x.axis}:${x.id}`).sort();
-  assert.deepEqual(checkManifest(found.map(x => ({ ...x, status: 'implemented' }))), statusIssues);
+  assert.deepEqual(checkManifest(found.map(x => ({ ...x, status: 'invented' }))), statusIssues);
   assert.deepEqual(checkManifest(found.map(x => ({ ...x, priority: NaN }))), found.map(x => `priority:${x.axis}:${x.id}`).sort());
   assert.deepEqual(checkManifest(found.map(x => ({ ...x, taskIds: [] }))), statusIssues);
   assert.deepEqual(checkManifest(found.map(x => ({ ...x, taskIds: ['invalid'] }))), statusIssues);

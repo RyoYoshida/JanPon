@@ -28,3 +28,20 @@ export const AXIS_MANIFEST = [
   { axis: 'A6', mode: 'select', ids: ['indexeddb'] },
 ] as const;
 export const MANIFEST_AUTHORITY = 'provisional internal mapping of GOAL section 2; not human-selected IDs' as const;
+
+/** Stage-7 reversible internal version/timing defaults, not new player settings. */
+export const ENGINE = {
+  schema: 'janpon/1-pm48271',
+  rngModulus: 2147483647,
+  rngMultiplier: 48271,
+  rngDomain: 2147483646,
+  resultDurationMs: 1800,
+  drawDurationMs: 450,
+  lampStepMs: 45,
+  seedWords: 1,
+  databaseName: 'janpon-v1',
+  databaseVersion: 1,
+  storeName: 'game',
+  stateKey: 'current',
+  lockName: 'janpon-v1-owner',
+} as const;

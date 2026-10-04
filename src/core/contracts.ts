@@ -11,7 +11,8 @@ export interface Dependencies<T> { clock: Clock; rng: Rng; store: Store<T> }
 export interface Prioritized { readonly id: string; readonly priority: number }
 export interface Registration extends Prioritized {
   readonly axis: string;
-  readonly status: 'unimplemented';
+  readonly status: 'unimplemented' | 'minimal';
+  readonly implementation?: unknown;
   readonly taskIds: readonly string[];
 }
 export interface AccountingEntry {
