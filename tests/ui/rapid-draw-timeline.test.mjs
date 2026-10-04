@@ -32,7 +32,7 @@ test('draw holds still, rejects rapid input, and starts sound plus fast choice o
   assert.deepEqual(ui.savedState,saved); assert.equal(ui.writes,writes);
   await ui.tick(1);
   assert.equal(center(ui).dataset.scene,'draw-ready');
-  assert.match(center(ui).innerHTML,/center-rapid-cycle/);
+  assert.match(center(ui).innerHTML,/class="center-cycle"/);
   assert.equal(drawTones(ui).length,1); assert.equal(drawTones(ui)[0].when,.45);
   assert.equal(ui.elapsed,450); assert.ok(ui.hands.every(button=>!button.disabled));
   assert.deepEqual(ui.savedState,saved); assert.equal(ui.writes,writes);
@@ -147,25 +147,16 @@ test('state cancellation and detached presentation never fire a late cue; listen
   }
 });
 
-test('rapid frame weights are complementary over invariant backlight and reduced mode hides that backlight', async () => {
+test('rapid choices use unchanged idle fades with no added backlight, inversion, or full-panel animation', async () => {
   const css=await readFile('game/style.css','utf8');
-  const body=css.match(/\.center-backlight\{([^}]+)\}/)?.[1];
-  assert.match(body,/opacity:\.55/); assert.doesNotMatch(body,/animation|transition/);
-  assert.match(css,/data-motion="reduced"\] \.center-backlight\{display:none\}/);
+  assert.doesNotMatch(css,/center-backlight|center-rapid-cycle|center-(rock|scissors|paper)-rapid/);
   assert.doesNotMatch(css,/data-scene="draw"\][^{]*\{animation:/);
-  function frames(hand) {
-    const source=css.match(new RegExp(`@keyframes center-${hand}-rapid\\{([\\s\\S]*?)\\}\\}`))[1]+'}';
-    return [...source.matchAll(/([\d%,.]+)\{opacity:([\d.]+)\}/g)].flatMap(([,at,opacity])=>at.split(',').map(point=>[Number(point.slice(0,-1)),Number(opacity)])).sort((a,b)=>a[0]-b[0]);
+  for(const hand of ['rock','scissors','paper']) {
+    const waiting=css.split('\n').find(line=>line.includes(`[data-scene="waiting"] .center-${hand}`)).split('{')[1];
+    const choosing=css.split('\n').find(line=>line.includes(`[data-scene="choosing"] .center-${hand}`)).split('{')[1];
+    assert.equal(choosing.replace('.48s','4.8s'),waiting);
   }
-  const values=['rock','scissors','paper'].map(frames);
-  function valueAt(frames,t) {
-    const right=frames.findIndex(([at])=>at>=t); if(right===0)return frames[0][1];
-    const [x0,y0]=frames[right-1],[x1,y1]=frames[right]; return y0+(y1-y0)*(t-x0)/(x1-x0);
-  }
-  for(let t=0;t<=100;t+=.1) {
-    const sum=values.reduce((total,frames)=>total+valueAt(frames,Math.min(t,100)),0);
-    assert.ok(Math.abs(sum-.45)<.000001,`frame ${t}: ${sum}`);
-  }
-  for(const hand of ['rock','scissors','paper']) assert.match(css,new RegExp(`animation:center-${hand}-rapid \\.48s linear infinite`));
+  const fastRules=css.split('\n').filter(line=>line.includes('.48s'));
+  assert.equal(fastRules.length,3); assert.ok(fastRules.every(line=>line.includes('] .center-')));
   assert.equal(4.8/.48,10);
 });

@@ -29,14 +29,8 @@ function iconPath(name: CenterIcon): string {
 export function controlIcon(name: CenterIcon): string {
   return `<svg viewBox="0 0 32 32" aria-hidden="true">${iconPath(name)}</svg>`;
 }
-function badge(name: CenterIcon): string {
-  return `<g class="center-badge" transform="translate(94 132)">${iconPath(name)}</g>`;
-}
 function hand(hand: Hand, className: string): string {
   return `<g class="center-hand ${className}" data-center-hand="${hand}"><rect width="95" height="95" fill="url(#center-led)" mask="url(#center-${hand})"/></g>`;
-}
-function rapidTrio(): string {
-  return `<g class="center-cycle center-rapid-cycle"><rect class="center-backlight" width="95" height="95" fill="url(#center-led)"/>${SPEC.hands.map(value => hand(value, `center-${value}`)).join('')}</g>`;
 }
 function trio(className: string): string {
   return `<g class="${className}">${SPEC.hands.map(value => hand(value, `center-${value}`)).join('')}</g>`;
@@ -55,13 +49,13 @@ export function sceneFor(view: GameView | null, status: AppStatus): CenterScene 
 export function centralScene(scene: CenterScene, view: GameView | null): string {
   const masks = SPEC.hands.map(value => `<mask id="center-${value}"><path d="${handPaths[value][0]}" fill="white"/><path d="${handPaths[value][1]}" fill="none" stroke="black" stroke-width="3" stroke-linecap="round"/></mask>`).join('');
   let content = '';
-  if (scene === 'waiting') content = trio('center-cycle') + badge('coin') + '<path class="center-insert" d="m104 176 6 6 6-6" fill="none" stroke="currentColor" stroke-width="2"/>';
-  if (scene === 'choosing' || scene === 'draw-ready') content = rapidTrio() + badge(scene === 'draw-ready' ? 'draw' : 'hand');
+  if (scene === 'waiting') content = trio('center-cycle');
+  if (scene === 'choosing' || scene === 'draw-ready') content = trio('center-cycle');
   if (['draw', 'win', 'loss', 'roulette'].includes(scene) && view?.result) {
-    content = hand(view.result.opponent, 'center-result-hand') + badge(scene === 'roulette' ? 'win' : view.result.outcome);
+    content = hand(view.result.opponent, 'center-result-hand');
     if (scene === 'roulette') content += '<circle class="center-orbit" cx="110" cy="72" r="62" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="14 18"/>';
   }
-  if (scene === 'payout') content = '<g class="center-coins"><ellipse cx="110" cy="65" rx="29" ry="11"/><path d="M81 65v20c0 15 58 15 58 0V65M81 75c0 15 58 15 58 0M81 85c0 15 58 15 58 0"/><path d="m110 113 0 16m-7-7 7 7 7-7"/></g>';
+  if (scene === 'payout') content = '<g class="center-coins"><ellipse cx="110" cy="65" rx="29" ry="11"/><path d="M81 65v20c0 15 58 15 58 0V65M81 75c0 15 58 15 58 0M81 85c0 15 58 15 58 0"/></g>';
   const notice: Partial<Record<CenterScene, CenterIcon>> = { loading: 'hourglass', saving: 'hourglass', 'game-over': 'flag', stopped: 'saveError', 'other-tab': 'tabs', closed: 'blocked' };
   const noticeIcon = notice[scene];
   if (noticeIcon) content = `<g class="center-notice" transform="translate(78 38) scale(2)">${iconPath(noticeIcon)}</g>`;

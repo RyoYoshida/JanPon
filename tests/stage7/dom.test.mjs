@@ -92,10 +92,10 @@ test('T07-04 loading, game over, errors and other-tab explain state without enab
   h.ui.render(idle, 'closed', ''); assert.equal(h.ids.get('retry').hidden, true);
 });
 
-test('T07-04 outcomes show Japanese labels and distinct symbols; draws remain free choosing', async () => {
+test('T07-04 outcomes show Japanese labels and distinct presentation modes; draws remain free choosing', async () => {
   const h = harness(), symbols = new Set();
   for (const view of [idle, choosing, draw, win, { ...win, result: { ...win.result, outcome: 'loss', payout: 0 } }]) {
-    h.ui.render(view, 'ready', ''); symbols.add(h.ids.get('state-indicator').innerHTML);
+    h.ui.render(view, 'ready', ''); symbols.add(`${h.ids.get('state-indicator').dataset.scene}:${h.machine.dataset.outcome}`);
     if (view.result) assert.match(h.ids.get('status').textContent, /あなたはグー、相手は/);
   }
   assert.equal(symbols.size, 5);

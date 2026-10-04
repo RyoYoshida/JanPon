@@ -8,30 +8,32 @@ import { startBundle } from '../helpers/browser-harness.mjs';
 // Source/DOM contract evidence only, not CSS rendering or a visual smoothness claim.
 const idle = { phase:'idle',balance:10,choices:[{kind:'coin'}],result:null };
 const choosing = { phase:'choosing',balance:9,choices:['rock','scissors','paper'].map(hand=>({kind:'hand',hand})),result:null };
-const cycle = markup => markup.match(/<g class="center-cycle(?: center-rapid-cycle)?">[\s\S]*?<\/g><\/g>/)?.[0];
+const cycle = markup => markup.match(/<g class="center-cycle">[\s\S]*?<\/g><\/g>/)?.[0];
 const sha = text => createHash('sha256').update(text).digest('hex');
 
-// Hashes captured from the original waiting-animation artwork.
-test('liked waiting markup, its keyframes, and reduced-motion CSS remain exactly unchanged', async () => {
-  assert.equal(sha(centralScene('waiting',idle)),'abc82d992a4e258352aed6175435f1a1d0eea03e2c84225e2116ce6efbaff9cd');
+// Baseline hand-only SVG/CSS with guidance removed.
+// The hand group, masks and keyframes retain the original waiting art.
+test('liked waiting hand art, keyframes and reduced-motion layout remain unchanged after guidance removal', async () => {
+  assert.equal(sha(centralScene('waiting',idle)),'d4a744bfdf819fe268b771ef63989f16e5cd5d0daf989e703b2e29d986e52a5a');
   const css=await readFile('game/style.css','utf8');
-  const protectedLines=css.split('\n').filter(line=>!line.includes('center-backlight')).filter(line=>line.includes('[data-scene="waiting"]')||line.startsWith('@keyframes center-rock-cycle')||line.startsWith('@keyframes center-scissors-cycle')||line.startsWith('@keyframes center-paper-cycle')||line.includes('data-motion=')||line.includes('@media(prefers-reduced-motion:reduce)')||line.startsWith('.center-cycle'));
-  assert.equal(sha(protectedLines.join('\n')),'f8efae7c6af098fdc7dd7c43aede35e164043fada320590a2df86a7345e852f0');
+  const protectedLines=css.split('\n').filter(line=>line.includes('[data-scene="waiting"]')||line.startsWith('@keyframes center-rock-cycle')||line.startsWith('@keyframes center-scissors-cycle')||line.startsWith('@keyframes center-paper-cycle')||line.includes('data-motion=')||line.includes('@media(prefers-reduced-motion:reduce)')||line.startsWith('.center-cycle'));
+  assert.equal(sha(protectedLines.join('\n')),'753bf7e43a960c87fcb59471fb2889e38b435a34629676d03a294fda3473d608');
 });
 
-test('choosing and draw-ready reuse the waiting hand shapes and order at 10x tempo over steady backlight', async () => {
+test('choosing and draw-ready share the complete waiting SVG and identical keyframes, with only 10x period difference', async () => {
   const css=await readFile('game/style.css','utf8'), waiting=cycle(centralScene('waiting',idle));
   assert.ok(waiting);
   assert.deepEqual([...waiting.matchAll(/data-center-hand="([^"]+)"/g)].map(match=>match[1]),['rock','scissors','paper']);
   for (const scene of ['choosing','draw-ready']) {
     const view = scene === 'draw-ready' ? {...choosing,result:{player:'paper',opponent:'paper',outcome:'draw',payout:0}} : choosing;
     const markup=centralScene(scene,view);
-    assert.equal(cycle(markup).replace('center-cycle center-rapid-cycle','center-cycle').replace(/<rect class="center-backlight"[^>]*\/>/,''),waiting);
-    assert.match(markup,/<rect class="center-backlight"/);
+    assert.equal(markup,centralScene('waiting',idle));
+    assert.equal(cycle(markup),waiting);
+    assert.doesNotMatch(markup,/center-backlight|center-rapid-cycle|center-badge|center-insert/);
     assert.doesNotMatch(markup,/center-choices|center-result-hand|data-hand=/);
     for (const hand of ['rock','scissors','paper']) {
       const rule=css.split('\n').find(line=>line.includes(`[data-scene="${scene}"] .center-${hand}`));
-      assert.ok(rule); assert.match(rule,new RegExp(`animation:center-${hand}-rapid \\.48s linear infinite`));
+      assert.ok(rule); assert.match(rule,new RegExp(`animation:center-${hand}-cycle \\.48s ease-in-out infinite`));
       assert.equal((css.match(new RegExp(`@keyframes center-${hand}-cycle`,'g'))??[]).length,1);
     }
   }
