@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#eee9dd">
+<title>JanPon</title>
+<style>
+*{box-sizing:border-box}
+html{min-height:100%;background:#eee9dd}
+body{margin:0;min-height:100svh;display:grid;place-items:center;padding:36px 20px 48px;background:radial-gradient(ellipse at 50% 35%,#faf7ef 0%,#eee9dd 72%);font-family:Arial,Helvetica,sans-serif}
+.machine{position:relative;width:min(100%,430px);padding:0 20px 28px;background:#d9362c;border:2px solid #9e2920;border-radius:44px 44px 27px 27px;box-shadow:inset 0 2px 1px #ff9e7b,inset 5px 0 8px #ff614b,inset -5px 0 8px #aa201b,0 9px 0 #872a22,0 12px 0 #60271f,0 28px 42px -14px #45291d55}
+header{position:relative;display:flex;justify-content:center;align-items:center;height:123px}
+h1{margin:0;padding-right:8px;color:#fff2bd;font-size:clamp(51px,15vw,70px);line-height:1;font-weight:900;font-style:italic;letter-spacing:-5px;text-shadow:0 3px 0 #87271f,0 5px 0 #87271f;transform:rotate(-5deg)}
+.face{position:relative;background:linear-gradient(110deg,#fff9df,#eedaa4);border:2px solid #822a22;border-radius:19px 19px 15px 15px;padding:25px 20px 28px;box-shadow:inset 0 2px 1px #fffdf5,0 3px 0 #b72a20}
+.display-rim{padding:7px;border-radius:17px;background:linear-gradient(140deg,#b7a77f 0%,#fffbdf 34%,#776b50 72%,#ded2ad 100%);box-shadow:0 2px 1px #fff9e8,inset 0 2px 2px #8e7857}
+.display{position:relative;aspect-ratio:1.17;background:#151714;border:4px solid #282822;border-radius:11px;overflow:hidden;box-shadow:inset 0 8px 18px #000}
+.display > svg{display:block;width:100%;height:100%}
+.display::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(130deg,#ffffff08,transparent 40%,transparent 70%,#00000018);box-shadow:inset 0 0 25px #0008}
+.controls{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:17px;margin-top:32px;padding:0 2px}
+button{position:relative;display:grid;place-items:center;padding:0;aspect-ratio:1;border:0;border-radius:50%;background:linear-gradient(135deg,#c1b18c,#fffae7 39%,#887957 87%);box-shadow:0 4px 4px #7b613744;opacity:1;appearance:none;-webkit-appearance:none;color:#332a22}
+button::before{content:"";position:absolute;inset:5px;border-radius:50%;background:radial-gradient(ellipse at 45% 26%,var(--light),var(--color) 75%);border:2px solid var(--edge);box-shadow:inset 0 3px 2px #fff8,inset 0 -5px 3px #0002,0 3px 0 var(--edge)}
+button:nth-child(1){--color:#ee5240;--light:#ff9870;--edge:#a93427}
+button:nth-child(2){--color:#efbd2a;--light:#ffe879;--edge:#b1841b}
+button:nth-child(3){--color:#478bc4;--light:#86c9e9;--edge:#285e8b}
+button svg{position:relative;width:58%;height:58%;overflow:visible;filter:drop-shadow(0 1px 0 #fff6)}
+.screw{position:absolute;width:7px;height:7px;border-radius:50%;background:linear-gradient(125deg,#ffeecc,#a67a55);box-shadow:0 1px 1px #6d2417;bottom:12px}
+.screw::after{content:"";position:absolute;top:3px;left:1px;width:5px;height:1px;background:#876647;transform:rotate(-35deg)}
+.screw:first-of-type{left:13px}.screw:last-of-type{right:13px}
+@media(max-width:420px){body{padding:24px 16px 38px}.machine{padding:0 15px 23px;border-radius:36px 36px 24px 24px}header{height:108px}.face{padding:21px 15px 25px}.controls{gap:13px;margin-top:28px}}
+@media(max-height:650px) and (min-width:500px){body{padding:20px}.machine{width:355px}header{height:94px}h1{font-size:58px}.face{padding:20px 16px 24px}.controls{margin-top:24px}}
+
+/* Fixed presentation demo; no game rules, randomness or persistence. */
+.display{aspect-ratio:1}
+.lamp{opacity:.35;transition:opacity 70ms;vector-effect:non-scaling-stroke}
+.lamp.active{opacity:1;stroke:#fff2c6;stroke-width:1.2;filter:drop-shadow(0 0 3px currentColor)}
+#prize{position:absolute;left:0;right:0;bottom:17%;text-align:center;color:#f579ae;font:700 clamp(22px,6vw,34px)/1 monospace;letter-spacing:2px;text-shadow:0 0 10px #ef5d9e77;z-index:1}
+.key{display:flex;justify-content:center;gap:19px;margin:16px 0 0;font:700 12px/1 monospace;color:#554630}
+.key span{display:flex;align-items:center;gap:5px}.key span::before{content:"";height:7px;width:7px;border-radius:50%;background:var(--lamp);box-shadow:0 0 0 1px #57442b77}
+.controls{margin-top:23px}.controls button{cursor:pointer}.controls button:disabled{cursor:default}.controls button:focus-visible{outline:3px solid #182820;outline-offset:5px}.controls button:active:not(:disabled){transform:translateY(2px)}
+.wallet{display:flex;justify-content:flex-end;align-items:center;gap:8px;margin:23px 0 0}.wallet svg{display:block;width:32px;height:32px}#balance{min-width:57px;text-align:center;padding:5px 7px;border-radius:5px;background:#272b22;border:2px solid #685e43;color:#f7d578;font:700 27px/1 monospace;box-shadow:inset 0 2px 5px #0005}
+.flying-coin{position:fixed;top:0;left:0;width:25px;height:25px;pointer-events:none;z-index:10;will-change:transform,opacity}.flying-coin svg{width:100%;height:100%}.blink{animation:blink .18s steps(1) 6}@keyframes blink{50%{opacity:.15}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}.flying-coin{display:none}}
+@media(max-width:420px){.key{gap:15px;font-size:11px}.wallet{margin-top:20px}}
+</style>
+</head>
+<body>
+<main class="machine" aria-label="JanPon トップ画面の外観案">
+<header><h1>JanPon</h1></header>
+<div class="face">
+<div class="display-rim"><div class="display">
+<svg id="ring" viewBox="0 0 360 360" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="100灯の配当ランプとグーのLED表示"><circle cx="180" cy="180" r="164" fill="none" stroke="#403c2b" stroke-width="1"/><rect class="lamp" data-value="1" x="177" y="13" width="6" height="15" rx="2" transform="rotate(0.0 180 180)" fill="#ffae39" style="color:#ffae39"/><rect class="lamp" data-value="2" x="177" y="13" width="6" height="15" rx="2" transform="rotate(3.6 180 180)" fill="#90d24a" style="color:#90d24a"/><rect class="lamp" data-value="1" x="177" y="13" width="6" height="15" rx="2" transform="rotate(7.2 180 180)" fill="#ffae39" style="color:#ffae39"/><rect class="lamp" data-value="1" x="177" y="13" width="6" height="15" rx="2" transform="rotate(10.8 180 180)" fill="#ffae39" style="color:#ffae39"/><rect class="lamp" data-value="4" x="177" y="13" width="6" height="15" rx="2" transform="rotate(14.4 180 180)" fill="#49c5e9" style="color:#49c5e9"/><rect class="lamp" data-value="1" x="177" y="13" width="6" height="15" rx="2" transform="rotate(18.0 180 180)" fill="#ffae39" style="color:#ffae39"/><rect class="lamp" data-value="1" x="177" y="13" width="6" height="15" rx="2" transform="rotate(21.6 180 180)" fill="#ffae39" style="color:#ffae39"/><rect class="lamp" data-value="2" x="177" y="13" width="6" height="15" rx="2" transform="rotate(25.2 180 180)" fill="#90d24a" style="color:#90d24a"/><rect class="lamp" data-value="1" x="177" y="13" width="6" height="15" rx="2" transform="rotate(28.8 180 180)" fill="#ffae39" style="color:#ffae39"/><rect class="lamp" data-value="1" x="177" y="13" width="6" height="15" rx="2" transform="rotate(32.4 180 180)" fill="#ffae39" style="color:#ffae39"/><rect class="lamp" data-value="7" x="177" y="13" width="6" height="15" rx="2" transform="rotate(36.0 180 180)" fill="#f579ae" style="color:#f579ae"/><rect class="lamp" data-value="1" x="177" y="13" width="6" height="15" rx="2" transform="rotate(39.6 180 180)" fill="#ffae39" style="color:#ffae39"/><rect class="lamp" data-value="1" x="177" y="13" width="6" height="15" rx="2" transform="rotate(43.2 180 180)" fill="#ffae39" style="color:#ffae39"/><rect class="lamp" data-value="4" x="177" y="13" width="6" height="15" rx="2" transform="rotate(46.8 180 180)" fill="#49c5e9" style="color:#49c5e9"/><rect class="lamp" data-value="1" x="177" y="13" width="6" height="15" rx="2" transform="rotate(50.4 180 180)" fill="#ffae39" style="color:#ffae39"/><rect class="lamp" data-value="2" x="177" y="13" width="6" height="15" rx="2" transform="rotate(54.0 180 180)" fill="#90d24a" style="color:#90d24a"/><rect class="lamp" data-value="1" x="177" y="13" width="6" height="15" rx="2" transform="rotate(57.6 180 180)" fill="#ffae39" style="color:#ffae39"/><rect class="lamp" data-value="1" x="177" y="13" width="6" height="15" rx="2" transform="rotate(61.2 180 180)" fill="#ffae39" style="color:#ffae39"/><rect class="lamp" data-value="2" x="177" y="13" width="6" height="15" rx="2" transform="rotate(64.8 180 180)" fill="#90d24a" style="color:#90d24a"/><rect class="lamp" data-value="1" x="177" y="13" width="6" height="15" rx="2" transform="rotate(68.4 180 180)" fill="#ffae39" style="color:#ffae39"/><rect class="lamp" data-value="1" x="177" y="13" width="6" height="15" rx="2" transform="rotate(72.0 180 180)" fill="#ffae39" style="color:#ffae39"/><rect class="lamp" data-value="4" x="177" y="13" width="6" height="15" rx="2" transform="rotate(75.6 180 180)" fill="#49c5e9" style="color:#49c5e9"/><rect class="lamp" data-value="1" x="177" y="13" width="6" height="15" rx="2" transform="rotate(79.2 180 180)" fill="#ffae39" style="color:#ffae39"/><rect class="lamp" data-value="1" x="177" y="13" width="6" height="15" rx="2" transform="rotate(82.8 180 180)" fill="#ffae39" style="color:#ffae39"/><rect class="lamp" data-value="2" x="177" y="13" width="6" height="15" rx="2" transform="rotate(86.4 180 180)" fill="#90d24a" style="color:#90d24a"/><rect class="lamp" data-value="1" x="177" y="13" width="6" height="15" rx="2" transform="rotate(90.0 180 180)" fill="#ffae39" style="color:#ffae39"/><rect class="lamp" data-value="1" x="177" y="13" width="6" height="15" rx="2" transform="rotate(93.6 180 180)" fill="#ffae39" style="color:#ffae39"/><rect class="lamp" data-value="7" x="177" y="13" width="6" height="15" rx="2" transform="rotate(97.2 180 180)" fill="#f579ae" style="color:#f579ae"/><rect class="lamp" data-value="1" x="177" y="13" width="6" height="15" rx="2" transform="rotate(100.8 180 180)" fill="#ffae39" style="color:#ffae39"/><rect class="lamp" data-value="1" x="177" y="13" width="6" height="15" rx="2" transform="rotate(104.4 180 180)" fill="#ffae39" style="color:#ffae39"/><rect class="lamp" data-value="2" x="177" y="13" width="6" height="15" rx="2" transform="rotate(108.0 180 180)" fill="#90d24a" style="color:#90d24a"/><rect class="lamp" data-value="1" x="177" y="13" width="6" height="15" rx="2" transform="rotate(111.6 180 180)" fill="#ffae39" style="color:#ffae39"/><rect class="lamp" data-value="4" x="177" y="13" width="6" height="15" rx="2" transform="rotate(115.2 180 180)" fill="#49c5e9" style="color:#49c5e9"/><rect class="lamp" data-value="1" x="177" y="13" width="6" height="15" rx="2" transform="rotate(118.8 180 180)" fill="#ffae39" style="color:#ffae39"/><rect class="lamp" data-value="1" x="177" y="13" width="6" height="15" rx="2" transform="rotate(122.4 180 180)" fill="#ffae39" style="color:#ffae39"/><rect class="lamp" data-value="2" x="177" y="13" width="6" height="15" rx="2" transform="rotate(126.0 180 180)" fill="#90d24a" style="color:#90d24a"/><rect class="lamp" data-value="1" x="177" y="13" width="6" height="15" rx="2" transform="rotate(129.6 180 180)" fill="#ffae39" style="color:#ffae39"/><rect class="lamp" data-value="1" x="177" y="13" width="6" height="15" rx="2" transform="rotate(133.2 180 180)" fill="#ffae39" style="color:#ffae39"/><rect class="lamp" data-value="20" x="177" y="13" width="6" height="15" rx="2" transform="rotate(136.8 180 180)" fill="#fff6cf" style="color:#fff6cf"/><rect class="lamp" data-value="1" x="177" y="13" width="6" height="15" rx="2" transform="rotate(140.4 180 180)" fill="#ffae39" style="color:#ffae39"/><rect class="lamp" data-value="1" x="177" y="13" width="6" height="15" rx="2" transform="rotate(144.0 180 180)" fill="#ffae39" style="color:#ffae39"/><rect class="lamp" data-value="4" x="177" y="13" width="6" height="15" rx="2" transform="rotate(147.6 180 180)" fill="#49c5e9" style="color:#49c5e9"/><rect class="lamp" data-value="1" x="177" y="13" width="6" height="15" rx="2" transform="rotate(151.2 180 180)" fill="#ffae39" style="color:#ffae39"/><rect class="lamp" data-value="2" x="177" y="13" width="6" height="15" rx="2" transform="rotate(154.8 180 180)" fill="#90d24a" style="color:#90d24a"/><rect class="lamp" data-value="1" x="177" y="13" width="6" height="15" rx="2" transform="rotate(158.4 180 180)" fill="#ffae39" style="color:#ffae39"/><rect class="lamp" data-value="1" x="177" y="13" width="6" height="15" rx="2" transform="rotate(162.0 180 180)" fill="#ffae39" style="color:#ffae39"/><rect class="lamp" data-value="1" x="177" y="13" width="6" height="15" rx="2" transform="rotate(165.6 180 180)" fill="#ffae39" style="color:#ffae39"/><rect class="lamp" data-value="2" x="177" y="13" width="6" height="15" rx="2" transform="rotate(169.2 180 180)" fill="#90d24a" style="color:#90d24a"/><rect class="lamp" data-value="1" x="177" y="13" width="6" height="15" rx="2" transform="rotate(172.8 180 180)" fill="#ffae39" style="color:#ffae39"/><rect class="lamp" data-value="1" x="177" y="13" width="6" height="15" rx="2" transform="rotate(176.4 180 180)" fill="#ffae39" style="color:#ffae39"/><rect class="lamp" data-value="4" x="177" y="13" width="6" height="15" rx="2" transform="rotate(180.0 180 180)" fill="#49c5e9" style="color:#49c5e9"/><rect class="lamp" data-value="1" x="177" y="13" width="6" height="15" rx="2" transform="rotate(183.6 180 180)" fill="#ffae39" style="color:#ffae39"/><rect class="lamp" data-value="7" x="177" y="13" width="6" height="15" rx="2" transform="rotate(187.2 180 180)" fill="#f579ae" style="color:#f579ae"/><rect class="lamp" data-value="1" x="177" y="13" width="6" height="15" rx="2" transform="rotate(190.8 180 180)" fill="#ffae39" style="color:#ffae39"/><rect class="lamp" data-value="2" x="177" y="13" width="6" height="15" rx="2" transform="rotate(194.4 180 180)" fill="#90d24a" style="color:#90d24a"/><rect class="lamp" data-value="1" x="177" y="13" width="6" height="15" rx="2" transform="rotate(198.0 180 180)" fill="#ffae39" style="color:#ffae39"/><rect class="lamp" data-value="1" x="177" y="13" width="6" height="15" rx="2" transform="rotate(201.6 180 180)" fill="#ffae39" style="color:#ffae39"/><rect class="lamp" data-value="1" x="177" y="13" width="6" height="15" rx="2" transform="rotate(205.2 180 180)" fill="#ffae39" style="color:#ffae39"/><rect class="lamp" data-value="2" x="177" y="13" width="6" height="15" rx="2" transform="rotate(208.8 180 180)" fill="#90d24a" style="color:#90d24a"/><rect class="lamp" data-value="1" x="177" y="13" width="6" height="15" rx="2" transform="rotate(212.4 180 180)" fill="#ffae39" style="color:#ffae39"/><rect class="lamp" data-value="4" x="177" y="13" width="6" height="15" rx="2" transform="rotate(216.0 180 180)" fill="#49c5e9" style="color:#49c5e9"/><rect class="lamp" data-value="1" x="177" y="13" width="6" height="15" rx="2" transform="rotate(219.6 180 180)" fill="#ffae39" style="color:#ffae39"/><rect class="lamp" data-value="1" x="177" y="13" width="6" height="15" rx="2" transform="rotate(223.2 180 180)" fill="#ffae39" style="color:#ffae39"/><rect class="lamp" data-value="1" x="177" y="13" width="6" height="15" rx="2" transform="rotate(226.8 180 180)" fill="#ffae39" style="color:#ffae39"/><rect class="lamp" data-value="2" x="177" y="13" width="6" height="15" rx="2" transform="rotate(230.4 180 180)" fill="#90d24a" style="color:#90d24a"/><rect class="lamp" data-value="1" x="177" y="13" width="6" height="15" rx="2" transform="rotate(234.0 180 180)" fill="#ffae39" style="color:#ffae39"/><rect class="lamp" data-value="1" x="177" y="13" width="6" height="15" rx="2" transform="rotate(237.6 180 180)" fill="#ffae39" style="color:#ffae39"/><rect class="lamp" data-value="4" x="177" y="13" width="6" height="15" rx="2" transform="rotate(241.2 180 180)" fill="#49c5e9" style="color:#49c5e9"/><rect class="lamp" data-value="1" x="177" y="13" width="6" height="15" rx="2" transform="rotate(244.8 180 180)" fill="#ffae39" style="color:#ffae39"/><rect class="lamp" data-value="2" x="177" y="13" width="6" height="15" rx="2" transform="rotate(248.4 180 180)" fill="#90d24a" style="color:#90d24a"/><rect class="lamp" data-value="1" x="177" y="13" width="6" height="15" rx="2" transform="rotate(252.0 180 180)" fill="#ffae39" style="color:#ffae39"/><rect class="lamp" data-value="1" x="177" y="13" width="6" height="15" rx="2" transform="rotate(255.6 180 180)" fill="#ffae39" style="color:#ffae39"/><rect class="lamp" data-value="7" x="177" y="13" width="6" height="15" rx="2" transform="rotate(259.2 180 180)" fill="#f579ae" style="color:#f579ae"/><rect class="lamp" data-value="1" x="177" y="13" width="6" height="15" rx="2" transform="rotate(262.8 180 180)" fill="#ffae39" style="color:#ffae39"/><rect class="lamp" data-value="1" x="177" y="13" width="6" height="15" rx="2" transform="rotate(266.4 180 180)" fill="#ffae39" style="color:#ffae39"/><rect class="lamp" data-value="2" x="177" y="13" width="6" height="15" rx="2" transform="rotate(270.0 180 180)" fill="#90d24a" style="color:#90d24a"/><rect class="lamp" data-value="1" x="177" y="13" width="6" height="15" rx="2" transform="rotate(273.6 180 180)" fill="#ffae39" style="color:#ffae39"/><rect class="lamp" data-value="1" x="177" y="13" width="6" height="15" rx="2" transform="rotate(277.2 180 180)" fill="#ffae39" style="color:#ffae39"/><rect class="lamp" data-value="4" x="177" y="13" width="6" height="15" rx="2" transform="rotate(280.8 180 180)" fill="#49c5e9" style="color:#49c5e9"/><rect class="lamp" data-value="1" x="177" y="13" width="6" height="15" rx="2" transform="rotate(284.4 180 180)" fill="#ffae39" style="color:#ffae39"/><rect class="lamp" data-value="1" x="177" y="13" width="6" height="15" rx="2" transform="rotate(288.0 180 180)" fill="#ffae39" style="color:#ffae39"/><rect class="lamp" data-value="2" x="177" y="13" width="6" height="15" rx="2" transform="rotate(291.6 180 180)" fill="#90d24a" style="color:#90d24a"/><rect class="lamp" data-value="1" x="177" y="13" width="6" height="15" rx="2" transform="rotate(295.2 180 180)" fill="#ffae39" style="color:#ffae39"/><rect class="lamp" data-value="1" x="177" y="13" width="6" height="15" rx="2" transform="rotate(298.8 180 180)" fill="#ffae39" style="color:#ffae39"/><rect class="lamp" data-value="4" x="177" y="13" width="6" height="15" rx="2" transform="rotate(302.4 180 180)" fill="#49c5e9" style="color:#49c5e9"/><rect class="lamp" data-value="1" x="177" y="13" width="6" height="15" rx="2" transform="rotate(306.0 180 180)" fill="#ffae39" style="color:#ffae39"/><rect class="lamp" data-value="2" x="177" y="13" width="6" height="15" rx="2" transform="rotate(309.6 180 180)" fill="#90d24a" style="color:#90d24a"/><rect class="lamp" data-value="1" x="177" y="13" width="6" height="15" rx="2" transform="rotate(313.2 180 180)" fill="#ffae39" style="color:#ffae39"/><rect class="lamp" data-value="1" x="177" y="13" width="6" height="15" rx="2" transform="rotate(316.8 180 180)" fill="#ffae39" style="color:#ffae39"/><rect class="lamp" data-value="1" x="177" y="13" width="6" height="15" rx="2" transform="rotate(320.4 180 180)" fill="#ffae39" style="color:#ffae39"/><rect class="lamp" data-value="7" x="177" y="13" width="6" height="15" rx="2" transform="rotate(324.0 180 180)" fill="#f579ae" style="color:#f579ae"/><rect class="lamp" data-value="1" x="177" y="13" width="6" height="15" rx="2" transform="rotate(327.6 180 180)" fill="#ffae39" style="color:#ffae39"/><rect class="lamp" data-value="2" x="177" y="13" width="6" height="15" rx="2" transform="rotate(331.2 180 180)" fill="#90d24a" style="color:#90d24a"/><rect class="lamp" data-value="1" x="177" y="13" width="6" height="15" rx="2" transform="rotate(334.8 180 180)" fill="#ffae39" style="color:#ffae39"/><rect class="lamp" data-value="1" x="177" y="13" width="6" height="15" rx="2" transform="rotate(338.4 180 180)" fill="#ffae39" style="color:#ffae39"/><rect class="lamp" data-value="4" x="177" y="13" width="6" height="15" rx="2" transform="rotate(342.0 180 180)" fill="#49c5e9" style="color:#49c5e9"/><rect class="lamp" data-value="1" x="177" y="13" width="6" height="15" rx="2" transform="rotate(345.6 180 180)" fill="#ffae39" style="color:#ffae39"/><rect class="lamp" data-value="1" x="177" y="13" width="6" height="15" rx="2" transform="rotate(349.2 180 180)" fill="#ffae39" style="color:#ffae39"/><rect class="lamp" data-value="2" x="177" y="13" width="6" height="15" rx="2" transform="rotate(352.8 180 180)" fill="#90d24a" style="color:#90d24a"/><rect class="lamp" data-value="1" x="177" y="13" width="6" height="15" rx="2" transform="rotate(356.4 180 180)" fill="#ffae39" style="color:#ffae39"/><svg x="99" y="91" width="162" height="139" viewBox="0 0 300 256" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+<defs>
+<pattern id="unlit" width="9" height="9" patternUnits="userSpaceOnUse"><circle cx="4.5" cy="4.5" r="2.35" fill="#454431" opacity=".42"/></pattern>
+<pattern id="lit" width="9" height="9" patternUnits="userSpaceOnUse"><circle cx="4.5" cy="4.5" r="3" fill="#ffaf3d"/><circle cx="4.5" cy="4" r="1.35" fill="#ffe299"/></pattern>
+<mask id="fist"><rect width="300" height="256" fill="black"/><g transform="translate(38 10) scale(2.4)"><path d="M22 39V26q0-8 8-8h35q9 0 9 9v26q0 15-14 20H39Q22 66 22 51V39Z" fill="white"/><path d="M22 39h34q8 0 8 9v5M34 20v17m12-17v17m12-17v17" fill="none" stroke="black" stroke-width="3" stroke-linecap="round"/></g></mask>
+<filter id="glow" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="3"/></filter>
+</defs>
+<rect width="300" height="256" fill="url(#unlit)"/>
+<g mask="url(#fist)"><rect width="300" height="256" fill="url(#lit)" filter="url(#glow)" opacity=".55"/><rect width="300" height="256" fill="url(#lit)"/></g>
+</svg></svg><output id="prize" aria-label="配当の表示例">7</output>
+</div></div>
+<div class="key" aria-label="配当ランプの色"><span style="--lamp:#ffae39">1</span><span style="--lamp:#90d24a">2</span><span style="--lamp:#49c5e9">4</span><span style="--lamp:#f579ae">7</span><span style="--lamp:#fff6cf">20</span></div><div class="controls" role="group" aria-label="固定の演出見本を再生">
+<button type="button" aria-label="グー：固定の演出を再生"><svg viewBox="0 0 95 95" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M22 39V26q0-8 8-8h35q9 0 9 9v26q0 15-14 20H39Q22 66 22 51V39Zm0 0h34q8 0 8 9v5M34 20v17m12-17v17m12-17v17" fill="none" stroke="currentColor" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/></svg></button>
+<button type="button" aria-label="チョキ：固定の演出を再生"><svg viewBox="0 0 95 95" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M37 43 26 15q-3-8 4-11 6-2 9 6l11 27 9-27q3-8 9-5 6 2 4 10L62 46h7q10 0 10 10v7q0 18-20 22H42Q27 80 27 65V52q0-9 10-9Zm0 0 16 9q7 4 3 10-3 5-10 1l-8-5" fill="none" stroke="currentColor" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/></svg></button>
+<button type="button" aria-label="パー：固定の演出を再生"><svg viewBox="0 0 95 95" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M24 48V22q0-7 6-7t6 7v23-32q0-7 6-7t6 7v30-28q0-7 6-7t6 7v29-22q0-6 6-6t6 6v39q0 21-22 25H40Q26 80 22 68L12 49q-4-7 2-10 6-3 10 9Z" fill="none" stroke="currentColor" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/></svg></button>
+</div>
+<div class="wallet" aria-label="メダル残高の表示例"><span id="coin-target"><svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="17" fill="#f9cb58" stroke="#9e7121" stroke-width="2"/><circle cx="20" cy="20" r="12" fill="none" stroke="#fff0ac" stroke-width="2"/><path d="M17 13h6v14h-6z" fill="#b2862a"/></svg></span><output id="balance" aria-label="メダル残高">10</output></div>
+</div>
+<i class="screw" aria-hidden="true"></i><i class="screw" aria-hidden="true"></i>
+</main>
+<script>
+(() => {
+  'use strict';
+  const buttons = [...document.querySelectorAll('.controls button')];
+  const lamps = [...document.querySelectorAll('.lamp')];
+  const prize = document.getElementById('prize');
+  const balance = document.getElementById('balance');
+  const wallet = document.getElementById('coin-target');
+  const display = document.querySelector('.display');
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+  const colors = {'1':'#ffae39','2':'#90d24a','4':'#49c5e9','7':'#f579ae','20':'#fff6cf'};
+  const timers = new Map();
+  const flights = new Set();
+  let busy = false, generation = 0;
+  const stop = lamps.findIndex(lamp => lamp.dataset.value === '7');
+  function light(index) {
+    lamps.forEach((lamp, i) => lamp.classList.toggle('active', i === index));
+    prize.textContent = lamps[index].dataset.value;
+    prize.style.color = colors[lamps[index].dataset.value];
+  }
+  function sleep(ms) {
+    return new Promise(resolve => {
+      const timer = setTimeout(() => { timers.delete(timer); resolve(); }, ms);
+      timers.set(timer, resolve);
+    });
+  }
+  function point(element) {
+    const r = element.getBoundingClientRect();
+    return {x:r.left + r.width/2 - 12.5, y:r.top + r.height/2 - 12.5};
+  }
+  async function fly(from, to, insertion=false) {
+    if (reduced.matches) return;
+    const coin = document.createElement('div');
+    coin.className = 'flying-coin';
+    coin.setAttribute('aria-hidden','true');
+    coin.innerHTML = wallet.innerHTML;
+    document.body.append(coin);
+    const start=point(from), end=point(to);
+    if (typeof coin.animate !== 'function') { coin.remove(); return; }
+    const animation=coin.animate([
+      {transform:`translate(${start.x}px,${start.y}px) scale(1) rotateY(0deg)`,opacity:1},
+      {transform:`translate(${(start.x+end.x)/2-24}px,${Math.min(start.y,end.y)-30}px) scale(1.1) rotateY(180deg)`,opacity:1,offset:.48},
+      {transform:`translate(${end.x}px,${end.y}px) scale(${insertion?'.15':'.6'}) rotateY(360deg)`,opacity:0}
+    ],{duration:insertion?500:650,easing:'cubic-bezier(.35,.05,.5,1)',fill:'forwards'});
+    const flight={coin,animation};flights.add(flight);
+    try { await animation.finished; } catch (_) { /* Canceled when leaving the page. */ }
+    finally { flights.delete(flight);coin.remove(); }
+  }
+  async function demo() {
+    if (busy) return;
+    busy=true;const run=++generation;
+    buttons.forEach(button => button.disabled=true);
+    balance.textContent='10';prize.classList.remove('blink');light(stop);
+    try {
+      await fly(wallet,display,true);
+      if(run!==generation)return;
+      balance.textContent='9';
+      if(reduced.matches){await sleep(100);}
+      else {
+        const steps=200+stop+1;
+        for(let i=0;i<steps;i++){
+          if(run!==generation)return;
+          light(i%100);
+          const remaining=steps-i;
+          await sleep(remaining>30?12:24+(30-remaining)*4);
+        }
+      }
+      if(run!==generation)return;
+      light(stop);prize.textContent='7';prize.classList.add('blink');
+      await sleep(reduced.matches?100:1080);
+      if(run!==generation)return;
+      prize.classList.remove('blink');
+      const stream=[];
+      for(let i=0;i<7;i++){
+        if(run!==generation)return;
+        stream.push(fly(prize,wallet));
+        if(!reduced.matches)await sleep(90);
+      }
+      await Promise.all(stream);
+      if(run!==generation)return;
+      balance.textContent='16';
+    } finally {
+      if(run===generation){busy=false;buttons.forEach(button=>button.disabled=false);}
+    }
+  }
+  function reset(){
+    generation++;busy=false;
+    for(const [timer,resolve] of timers){clearTimeout(timer);resolve();}timers.clear();
+    for(const flight of flights){flight.animation.cancel();flight.coin.remove();}flights.clear();
+    prize.classList.remove('blink');balance.textContent='10';light(stop);
+    buttons.forEach(button=>button.disabled=false);
+  }
+  buttons.forEach(button=>button.addEventListener('click',demo));
+  window.addEventListener('pagehide',reset);
+  light(stop);
+})();
+
+</script>
+</body>
+</html>
