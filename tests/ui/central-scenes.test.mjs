@@ -206,7 +206,8 @@ test('central CSS retains slow waiting and static reduced fallbacks while sharin
   }
   const centerRule=css.match(/\.state-indicator\{([^}]+)\}/)[1];
   assert.match(centerRule,/pointer-events:none/);
-  assert.match(css,/\.state-controls\{[^}]*top:64%/);
+  assert.match(css,/\.state-controls\{[^}]*top:54%/);
+  // The widened windows begin at radius123: keep recovery controls and focus inside.
   // 320px viewport source geometry: 198px display, 44px target plus 7px focus clearance.
-  assert.ok(198 * .64 + 44 + 7 < 198 * (332 / 360));
+  assert.ok(Math.hypot(22 + 7, 198 * .54 + 44 + 7 - 99) < 198 * (123 / 360));
 });

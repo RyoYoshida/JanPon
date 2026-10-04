@@ -13,7 +13,7 @@ test('packaged bootstrap completes the deterministic 10 → 9 → 13 first round
     assert.equal(ui.ids.get('balance').textContent, '10');
     assert.equal(ui.writes, 1);
     assert.equal(ui.hands.length, 3);
-    assert.equal(ui.lamps.length, 100);
+    assert.equal(ui.lamps.length, 12);
     ui.hands[2].click(); await ui.flush();
     assert.equal(ui.writes, 1, 'a hand before the stake cannot alter storage');
     ui.ids.get('coin-input').click(); ui.ids.get('coin-input').click();

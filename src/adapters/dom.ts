@@ -1,5 +1,6 @@
 import { ENGINE, SPEC } from '../spec.ts';
 import { presentationCue } from './presentation-cues.ts';
+import { prizeWindow, rouletteFrames } from './roulette-windows.ts';
 import { centralScene, controlIcon, sceneFor } from './central-scene.ts';
 import type { CenterScene } from './central-scene.ts';
 import type { AppStatus, Choice, GameView, Hand } from '../core/game-contracts.ts';
@@ -26,6 +27,7 @@ export function createDisplay(root: Document): {
   const ring = find<SVGElement>('#ring');
   const hands = Array.from(root.querySelectorAll<HTMLButtonElement>('.controls button'));
   const lamps = Array.from(root.querySelectorAll<SVGElement>('.lamp'));
+  const windowValues = lamps.map(lamp => Number(lamp.dataset.value));
   const clock = root.defaultView;
   if (!clock) throw new Error('JanPon display requires a document window');
   let current: GameView | null = null, appStatus: AppStatus = 'new', generation = 0;
@@ -48,11 +50,11 @@ export function createDisplay(root: Document): {
   function disableInputs(): void { coin.disabled = true; restart.disabled = true; hands.forEach(button => { button.disabled = true; }); }
   function revealPrize(view: GameView): void {
     if (!view.result) return;
-    const stop = lamps.findIndex(lamp => lamp.dataset.value === String(view.result!.payout));
+    const stop = prizeWindow(windowValues, view);
     center('payout'); light(stop); prize.textContent = String(view.result.payout);
     const description = `配当${view.result.payout}枚。精算して次へ進みます。残高${view.balance}枚`;
     statusText.textContent = description; machine.setAttribute('aria-label', `JanPon。${description}`);
-    ring.setAttribute('aria-label', `${description}。配当ランプ${SPEC.payoutWeightTotal}灯`);
+    ring.setAttribute('aria-label', `${description}。配当窓${lamps.length}個`);
     prize.style.color = lamps[stop]?.getAttribute('fill') ?? '';
   }
   function enableHands(): void {
@@ -111,7 +113,7 @@ export function createDisplay(root: Document): {
     machine.dataset.phase = blocked ? status : view?.phase ?? 'loading';
     machine.dataset.outcome = inResult ? result.outcome : '';
     machine.setAttribute('aria-label', `JanPon。${description}`);
-    ring.setAttribute('aria-label', `${description}。配当ランプ${SPEC.payoutWeightTotal}灯`);
+    ring.setAttribute('aria-label', `${description}。配当窓${lamps.length}個`);
     statusText.textContent = `${description}。${view ? `残高${view.balance}枚` : '残高は未確認です'}`;
     coin.disabled = !ready || !view.choices.some(choice => choice.kind === 'coin');
     coin.setAttribute('aria-label', !coin.disabled ? `コインと残高の周辺を押して1枚投入。現在${view?.balance}枚` : '現在は追加投入できません');
@@ -145,11 +147,10 @@ export function createDisplay(root: Document): {
       if (run !== generation) { await finishing; return; }
       return;
     }
-    let step = 0;
-    for (let elapsed = 0; elapsed < ENGINE.resultDurationMs - ENGINE.drawDurationMs; elapsed += ENGINE.lampStepMs) {
+    for (const frame of rouletteFrames(windowValues, view)) {
       if (run !== generation) { await finishing; return; }
-      light(step % lamps.length); step++;
-      await sleep(ENGINE.lampStepMs);
+      light(frame.index);
+      await sleep(frame.duration);
     }
     if (run !== generation) { await finishing; return; }
     revealPrize(view);

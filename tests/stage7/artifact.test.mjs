@@ -9,6 +9,6 @@ test('self-contained game artifact matches its manifest and JavaScript parses',a
  assert.ok(html.includes(`name="janpon-source-sha256" content="${manifest.sourceSha256}"`));
  assert.doesNotMatch(html,/<script[^>]+src=|<link[^>]+stylesheet/);
  const script=html.match(/<script>([\s\S]*?)<\/script>/)?.[1];assert.ok(script);assert.doesNotThrow(()=>new vm.Script(script));
- assert.equal((html.match(/class="lamp"/g)||[]).length,100);
+ assert.equal((html.match(/class="lamp"/g)||[]).length,12);
  assert.equal(manifest.browser,'NOT_RUN');
 });

@@ -23,24 +23,24 @@ button svg{position:relative;width:58%;height:58%;overflow:visible;filter:drop-s
 @media(max-width:420px){body{padding:24px 16px 38px}.machine{padding:0 15px 23px;border-radius:36px 36px 24px 24px}header{height:108px}.face{padding:21px 15px 25px}.controls{gap:13px;margin-top:28px}}
 @media(max-height:650px) and (min-width:500px){body{padding:20px}.machine{width:355px}header{height:94px}h1{font-size:58px}.face{padding:20px 16px 24px}.controls{margin-top:24px}}
 
-/* Minimal live game: preserves the approved cabinet, lamps and coin target. */
+/* Live cabinet: the approved twelve prize windows are presentation, not odds. */
 .display{aspect-ratio:1}
-.lamp{opacity:.35;transition:opacity 70ms;vector-effect:non-scaling-stroke}
-.lamp.active{opacity:1;stroke:#fff2c6;stroke-width:1.2;filter:drop-shadow(0 0 3px currentColor)}
-#prize{position:absolute;left:0;right:0;bottom:17%;min-height:1em;text-align:center;color:#f579ae;font:700 clamp(22px,6vw,34px)/1 monospace;letter-spacing:2px;text-shadow:0 0 10px #ef5d9e77;z-index:1}
-.key{display:flex;justify-content:center;gap:19px;margin:16px 0 0;font:700 12px/1 monospace;color:#554630}
-.key span{display:flex;align-items:center;gap:5px}.key span::before{content:"";height:7px;width:7px;border-radius:50%;background:var(--lamp);box-shadow:0 0 0 1px #57442b77}
+.lamp .window-face{fill:url(#window-glass);stroke:#5b4933;stroke-width:1.4}
+.window-number{fill:#493320;stroke:#f2dfaa;stroke-width:.65;paint-order:stroke fill;font:900 32px/1 Arial,Helvetica,sans-serif;pointer-events:none}
+.lamp.active .window-face{fill:currentColor;stroke:#fff4c8;stroke-width:2.5;filter:drop-shadow(0 0 4px currentColor)}
+.lamp.active .window-number{fill:#211b12;stroke:#fff4cf;stroke-width:1.1}
+#prize{position:absolute;left:0;right:0;bottom:23%;min-height:1em;text-align:center;color:#f579ae;font:700 clamp(22px,6vw,34px)/1 monospace;letter-spacing:2px;text-shadow:0 0 10px #ef5d9e77;z-index:1}
 .controls{margin-top:23px}.controls button{cursor:pointer}.controls button:disabled{opacity:.62;filter:saturate(.65);cursor:default}.controls button:focus-visible{outline:3px solid #182820;outline-offset:5px}.controls button:active:not(:disabled){transform:translateY(2px)}
 .controls button[aria-pressed="true"]{outline:2px solid #6e4e2d;outline-offset:4px}
 #balance{min-width:57px;text-align:center;padding:5px 7px;border-radius:5px;background:#272b22;border:2px solid #685e43;color:#f7d578;font:700 27px/1 monospace;box-shadow:inset 0 2px 5px #0005}
 .sr-only{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
 [hidden]{display:none!important}.tool{width:40px;height:40px;min-width:40px;aspect-ratio:1;border-radius:50%;background:#f8e7b7;box-shadow:0 2px 0 #94684855;border:1px solid #b18d5e;color:#684b30;cursor:pointer}.tool::before{display:none}.tool svg{width:24px;height:24px;filter:none}.tool:focus-visible{outline:3px solid #a9782b;outline-offset:3px}.tool:disabled{opacity:.28;cursor:default}
-.state-controls{position:absolute;left:50%;top:64%;transform:translateX(-50%);display:flex;align-items:center;gap:10px;z-index:2}.state-controls svg{width:100%;height:100%}.state-controls .tool svg{width:24px;height:24px}
+.state-controls{position:absolute;left:50%;top:54%;transform:translateX(-50%);display:flex;align-items:center;gap:10px;z-index:2}.state-controls svg{width:100%;height:100%}.state-controls .tool svg{width:24px;height:24px}
 .state-indicator{position:absolute;left:50%;top:49%;width:66%;height:60%;transform:translate(-50%,-50%);color:#ffc369;filter:drop-shadow(0 0 3px #edb04b33);pointer-events:none}.state-indicator svg{width:100%;height:100%}.display.problem{box-shadow:inset 0 0 25px #862c1633}
 /* Coin-only activation: the padded native button preserves the approved art position. */
 button.wallet{width:max-content;max-width:100%;min-width:120px;min-height:56px;height:auto;aspect-ratio:auto;display:flex;justify-content:flex-end;align-items:center;gap:8px;margin:11px -12px -12px auto;padding:12px;border:0;border-radius:12px;background:transparent;box-shadow:none;color:inherit;cursor:pointer}
 button.wallet::before{display:none}button.wallet:disabled{opacity:1;cursor:default}button.wallet svg{position:static;width:32px;height:32px;filter:none}button.wallet:focus-visible{outline:3px solid #a9782b;outline-offset:2px}
-@media(max-width:420px){.key{gap:15px;font-size:11px}button.wallet{margin-top:8px}}
+@media(max-width:420px){button.wallet{margin-top:8px}}
 /* Hardware settings occupy the red lower apron, never the white face or coin target. */
 .settings-controls{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:16px;margin-top:20px;padding:0 4px}
 .settings-controls .tool{width:54px;height:58px;min-width:54px;flex-shrink:0;border:2px solid #762018;border-radius:10px;background:#74251e;box-shadow:inset 0 2px 4px #350c09,0 1px 0 #ff7d5f;color:#e8d4a8}

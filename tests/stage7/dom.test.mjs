@@ -4,7 +4,6 @@ import { readFile } from 'node:fs/promises';
 import { createDisplay } from '../../src/adapters/dom.ts';
 const html = await readFile(new URL('../../game/index.html', import.meta.url), 'utf8');
 const css = await readFile(new URL('../../game/style.css', import.meta.url), 'utf8');
-const approved = await readFile(new URL('../../mock/index.html', import.meta.url), 'utf8');
 
 // Small deterministic adapter harness, not a browser or a layout/accessibility conformance test.
 class Element {
@@ -25,7 +24,7 @@ function harness() {
   const ids = new Map([...html.matchAll(/<[^>]*\bid="([^"]+)"[^>]*>/g)].map(m => [m[1], new Element(m[0])]));
   const machine = new Element('class="machine"'), display = new Element('class="display"');
   const hands = [...html.matchAll(/<button[^>]*\bdata-hand="[^"]+"[^>]*>/g)].map(m => new Element(m[0]));
-  const lamps = [...html.matchAll(/<rect class="lamp"[^>]*>/g)].map(m => new Element(m[0]));
+  const lamps = [...html.matchAll(/<g class="lamp"[^>]*>/g)].map(m => new Element(m[0]));
   const timers = new Map(); let next = 0, elapsed = 0;
   const root = {
     querySelector: selector => selector === '.machine' ? machine : selector === '.display' ? display : ids.get(selector.slice(1)),
@@ -44,11 +43,12 @@ const choosing = { phase: 'choosing', balance: 9, choices: [{ kind: 'hand', hand
 const win = { phase: 'result', balance: 9, choices: [], result: { player: 'rock', opponent: 'scissors', outcome: 'win', payout: 20 } };
 const draw = { ...choosing, result: { player: 'rock', opponent: 'rock', outcome: 'draw', payout: 0 } };
 
-test('T07-04 live shell preserves the approved 100 lamp art and broad coin-only target', () => {
-  const lampTags = source => [...source.matchAll(/<rect class="lamp"[^>]*>/g)].map(m => m[0]);
-  assert.deepEqual(lampTags(html), lampTags(approved));
+test('live shell uses the newly approved 12-window artwork and preserves the broad coin-only target', () => {
+  const lampTags = source => [...source.matchAll(/<g class="lamp"[^>]*>/g)].map(m => m[0]);
+  // The explicit 2026-10-04 twelve-window approval supersedes only the old visual art.
+  assert.deepEqual(lampTags(html).map(tag => Number(tag.match(/data-value="(\d+)"/)[1])), [4,1,2,7,4,2,20,1,2,4,7,2]);
   const weights = {}; for (const tag of lampTags(html)) { const value = tag.match(/data-value="(\d+)"/)[1]; weights[value] = (weights[value] ?? 0) + 1; }
-  assert.deepEqual(weights, { 1: 65, 2: 18, 4: 11, 7: 5, 20: 1 });
+  assert.deepEqual(weights, { 1: 2, 2: 4, 4: 3, 7: 2, 20: 1 });
   assert.match(html, /<header><h1>JanPon<\/h1><\/header>/);
   assert.equal((html.match(/data-hand=/g) ?? []).length, 3);
   assert.match(html, /<button id="coin-input"[^>]*type="button"[^>]*>[\s\S]*id="coin-target"[\s\S]*id="balance"[\s\S]*<\/button>/);
