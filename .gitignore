@@ -2,3 +2,24 @@ node_modules/
 dist/
 .generated/
 .verification/
+
+# Local editor, OS and temporary files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.log
+*.tmp
+*.bak
+*.orig
+*.rej
+*.zip
+
+# Local secrets and non-public working files
+.env
+.env.*
+!.env.example
+private/
+backups/
+docs/pending/
+mock/archive/
