@@ -1,0 +1,126 @@
+{
+  "status": "approved_semantic_examples",
+  "technical_notation": "Internal phase names and u0..99 encoding are explanatory defaults, not separately human-selected contracts.",
+  "rows": [
+    {
+      "id": "G01",
+      "input": "グー／グー",
+      "expected": "あいこ",
+      "rationale": "同じ手"
+    },
+    {
+      "id": "G02",
+      "input": "グー／チョキ",
+      "expected": "勝ち",
+      "rationale": "グーがチョキに勝つ"
+    },
+    {
+      "id": "G03",
+      "input": "グー／パー",
+      "expected": "負け",
+      "rationale": "パーがグーに勝つ"
+    },
+    {
+      "id": "G04",
+      "input": "チョキ／グー",
+      "expected": "負け",
+      "rationale": "グーがチョキに勝つ"
+    },
+    {
+      "id": "G05",
+      "input": "チョキ／チョキ",
+      "expected": "あいこ",
+      "rationale": "同じ手"
+    },
+    {
+      "id": "G06",
+      "input": "チョキ／パー",
+      "expected": "勝ち",
+      "rationale": "チョキがパーに勝つ"
+    },
+    {
+      "id": "G07",
+      "input": "パー／グー",
+      "expected": "勝ち",
+      "rationale": "パーがグーに勝つ"
+    },
+    {
+      "id": "G08",
+      "input": "パー／チョキ",
+      "expected": "負け",
+      "rationale": "チョキがパーに勝つ"
+    },
+    {
+      "id": "G09",
+      "input": "パー／パー",
+      "expected": "あいこ",
+      "rationale": "同じ手"
+    },
+    {
+      "id": "G10",
+      "input": "10枚・投入待ち: 手/筐体→コイン→連打",
+      "expected": "10→10→9→9枚。投入後すぐ選択可",
+      "rationale": "コインだけ1回投入"
+    },
+    {
+      "id": "G11",
+      "input": "1枚→投入→あいこ2回",
+      "expected": "0枚で手選択継続、投入計1枚",
+      "rationale": "あいこ無料・精算前0枚は終了しない"
+    },
+    {
+      "id": "G12",
+      "input": "1枚→投入→負け→はじめから",
+      "expected": "0枚で終了→明示操作で10枚",
+      "rationale": "精算後0枚終了・再開始"
+    },
+    {
+      "id": "G13",
+      "input": "1枚→投入→20枚当選→精算通知2回",
+      "expected": "0→20→20枚、次の投入待ち",
+      "rationale": "配当は1回だけ"
+    },
+    {
+      "id": "G14",
+      "input": "配当整数u=0..99",
+      "expected": "0–64:1 / 65–82:2 / 83–93:4 / 94–98:7 / 99:20",
+      "rationale": "区間数65/18/11/5/1"
+    },
+    {
+      "id": "G15",
+      "input": "固定配当＋独立3手＋無料あいこ",
+      "expected": "勝ち平均2枚、決着勝率1/2、還元100%",
+      "rationale": "(65+36+44+35+20)/100=2"
+    },
+    {
+      "id": "G16",
+      "input": "10枚の投入保存を中断",
+      "expected": "未commitは10・idle／commit済は9・choosing",
+      "rationale": "残高とラウンドが一体"
+    },
+    {
+      "id": "G17",
+      "input": "勝ち20枚の結果保存を中断",
+      "expected": "旧choosingまたは同じ20のwin-result、残高9",
+      "rationale": "未確定結果を表示せず保存RNGから再現"
+    },
+    {
+      "id": "G18",
+      "input": "残高9・当選20の精算保存を中断／再読込",
+      "expected": "9・未精算または29・精算済→最終29",
+      "rationale": "加算と精算印が一体"
+    },
+    {
+      "id": "G19",
+      "input": "同じ確定結果で音/動きの設定だけ変更",
+      "expected": "手・当選・残高が変わらない",
+      "rationale": "演出が抽選・会計へ逆流しない"
+    },
+    {
+      "id": "G20",
+      "input": "保存失敗／破損保存",
+      "expected": "操作停止、元保存保持。勝手に10枚化なし",
+      "rationale": "保存不能は停止、破損は保持して再試行／中止"
+    }
+  ]
+}
