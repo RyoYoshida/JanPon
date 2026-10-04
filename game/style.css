@@ -60,9 +60,6 @@ button.wallet::before{display:none}button.wallet:disabled{opacity:1;cursor:defau
 .center-cycle .center-hand,.center-result-hand{transform:translate(62px,20px) scale(1.05)}
 .center-cycle .center-hand{opacity:0}
 .center-cycle .center-rock{opacity:1}
-.center-choices .center-hand{transform:translate(3px,43px) scale(.72)}
-.center-choices .center-scissors{transform:translate(77px,43px) scale(.72)}
-.center-choices .center-paper{transform:translate(151px,43px) scale(.72)}
 .center-badge{opacity:.86}
 .center-coins{fill:none;stroke:currentColor;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
 .center-progress{fill:currentColor;opacity:.7}
@@ -71,7 +68,9 @@ button.wallet::before{display:none}button.wallet:disabled{opacity:1;cursor:defau
 .state-indicator[data-scene="waiting"] .center-scissors{animation:center-scissors-cycle 4.8s ease-in-out infinite}
 .state-indicator[data-scene="waiting"] .center-paper{animation:center-paper-cycle 4.8s ease-in-out infinite}
 .state-indicator[data-scene="waiting"] .center-insert{animation:center-breathe 2.4s ease-in-out infinite}
-.state-indicator[data-scene="choosing"] .center-choices,.state-indicator[data-scene="draw-ready"] .center-choices{animation:center-breathe 2.4s ease-in-out infinite}
+.state-indicator[data-scene="choosing"] .center-rock,.state-indicator[data-scene="draw-ready"] .center-rock{animation:center-rock-cycle 3.6s ease-in-out infinite}
+.state-indicator[data-scene="choosing"] .center-scissors,.state-indicator[data-scene="draw-ready"] .center-scissors{animation:center-scissors-cycle 3.6s ease-in-out infinite}
+.state-indicator[data-scene="choosing"] .center-paper,.state-indicator[data-scene="draw-ready"] .center-paper{animation:center-paper-cycle 3.6s ease-in-out infinite}
 .state-indicator[data-scene="draw"] .center-result-hand{animation:center-nod 1.8s ease-in-out infinite}
 .state-indicator[data-scene="win"] .center-badge{animation:center-breathe 2.4s ease-in-out infinite}
 .state-indicator[data-scene="loss"] .center-result-hand{opacity:.62}
