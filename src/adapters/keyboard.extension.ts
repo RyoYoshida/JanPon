@@ -36,7 +36,7 @@ export function installKeyboard(host: BrowserHost): () => void {
     const target = event.target as Element | null;
     const hand = shortcuts[value];
     const button = target?.closest?.('button') as HTMLButtonElement | null;
-    const focused = button && root.activeElement === button && machine?.contains(button);
+    const focused = button && root.activeElement === button && (machine?.contains(button) || button.closest('.game-shell > .settings-controls'));
     if (!hand && !focused) return;
     if (composing || event.isComposing || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey || editable(target) || event.defaultPrevented) {
       if (!hand && focused) { event.preventDefault(); suppressed.add(token); }

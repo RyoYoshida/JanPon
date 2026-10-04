@@ -2,6 +2,7 @@
 *{box-sizing:border-box}
 html{min-height:100%;background:#eee9dd}
 body{margin:0;min-height:100svh;display:grid;place-items:center;padding:36px 20px 48px;background:radial-gradient(ellipse at 50% 35%,#faf7ef 0%,#eee9dd 72%);font-family:Arial,Helvetica,sans-serif}
+.game-shell{width:min(100%,430px)}
 .machine{position:relative;width:min(100%,430px);padding:0 20px 28px;background:#d9362c;border:2px solid #9e2920;border-radius:44px 44px 27px 27px;box-shadow:inset 0 2px 1px #ff9e7b,inset 5px 0 8px #ff614b,inset -5px 0 8px #aa201b,0 9px 0 #872a22,0 12px 0 #60271f,0 28px 42px -14px #45291d55}
 header{position:relative;display:flex;justify-content:center;align-items:center;height:123px}
 h1{margin:0;padding-right:8px;color:#fff2bd;font-size:clamp(51px,15vw,70px);line-height:1;font-weight:900;font-style:italic;letter-spacing:-5px;text-shadow:0 3px 0 #87271f,0 5px 0 #87271f;transform:rotate(-5deg)}
@@ -21,7 +22,7 @@ button svg{position:relative;width:58%;height:58%;overflow:visible;filter:drop-s
 .screw::after{content:"";position:absolute;top:3px;left:1px;width:5px;height:1px;background:#876647;transform:rotate(-35deg)}
 .screw:first-of-type{left:13px}.screw:last-of-type{right:13px}
 @media(max-width:420px){body{padding:24px 16px 38px}.machine{padding:0 15px 23px;border-radius:36px 36px 24px 24px}header{height:108px}.face{padding:21px 15px 25px}.controls{gap:13px;margin-top:28px}}
-@media(max-height:650px) and (min-width:500px){body{padding:20px}.machine{width:355px}header{height:94px}h1{font-size:58px}.face{padding:20px 16px 24px}.controls{margin-top:24px}}
+@media(max-height:650px) and (min-width:500px){body{padding:20px}.game-shell{width:355px}.machine{width:355px}header{height:94px}h1{font-size:58px}.face{padding:20px 16px 24px}.controls{margin-top:24px}}
 
 /* Minimal live game: preserves the approved cabinet, lamps and coin target. */
 .display{aspect-ratio:1}
@@ -41,3 +42,6 @@ button svg{position:relative;width:58%;height:58%;overflow:visible;filter:drop-s
 button.wallet{width:max-content;max-width:100%;min-width:120px;min-height:56px;height:auto;aspect-ratio:auto;display:flex;justify-content:flex-end;align-items:center;gap:8px;margin:11px -12px -12px auto;padding:12px;border:0;border-radius:12px;background:transparent;box-shadow:none;color:inherit;cursor:pointer}
 button.wallet::before{display:none}button.wallet:disabled{opacity:1;cursor:default}button.wallet svg{position:static;width:32px;height:32px;filter:none}button.wallet:focus-visible{outline:3px solid #a9782b;outline-offset:2px}
 @media(max-width:420px){.key{gap:15px;font-size:11px}button.wallet{margin-top:8px}.state-controls{left:15px;bottom:26px}}
+/* Separate page-level settings remain below the cabinet shadow on every viewport. */
+.settings-controls{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:12px;margin-top:28px;padding:0 12px}
+.settings-controls .tool{width:44px;height:44px;min-width:44px}

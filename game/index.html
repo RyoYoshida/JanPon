@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#eee9dd"><title>JanPon</title><link rel="stylesheet" href="style.css"></head><body>
-<main class="machine" aria-label="JanPon。保存されたゲームを確認中です">
+<div class="game-shell"><main class="machine" aria-label="JanPon。保存されたゲームを確認中です">
 <header><h1>JanPon</h1></header>
 <div class="face">
 <div class="display-rim"><div class="display">
@@ -23,7 +23,7 @@
 <div class="state-controls"><button id="restart" class="tool" type="button" aria-label="はじめから" hidden disabled></button><button id="retry" class="tool" type="button" aria-label="保存を消さずに再読み込みして再試行" hidden disabled></button><div id="state-symbol" aria-hidden="true"></div></div><button id="coin-input" class="wallet" type="button" disabled aria-label="保存されたゲームを確認中です"><span id="coin-target"><svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="17" fill="#f9cb58" stroke="#9e7121" stroke-width="2"/><circle cx="20" cy="20" r="12" fill="none" stroke="#fff0ac" stroke-width="2"/><path d="M17 13h6v14h-6z" fill="#b2862a"/></svg></span><output id="balance" aria-label="メダル残高。確認中"></output></button>
 </div>
 <i class="screw" aria-hidden="true"></i><i class="screw" aria-hidden="true"></i>
-</main>
+</main></div>
 <p id="status" class="sr-only" role="status" aria-live="polite" aria-atomic="true">保存されたゲームを確認中です</p>
 <noscript><p class="sr-only">遊ぶにはJavaScriptを有効にしてください</p></noscript>
 <script type="module" src="../dist/.generated/main.js"></script></body></html>
