@@ -1,0 +1,63 @@
+name: Publish JanPon to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out public source
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Install locked dependencies
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Build standalone game
+        run: npm run build:game
+      - name: Run automated checks
+        run: npm run check
+      - name: Prepare game-only website
+        run: |
+          mkdir -p "${RUNNER_TEMP}/janpon-site"
+          cp dist/JanPon.html "${RUNNER_TEMP}/janpon-site/index.html"
+          test -s "${RUNNER_TEMP}/janpon-site/index.html"
+      - name: Upload website
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: ${{ runner.temp }}/janpon-site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Check Pages configuration
+        uses: actions/configure-pages@v5
+        with:
+          enablement: false
+      - name: Deploy game
+        id: deployment
+        uses: actions/deploy-pages@v5

@@ -37,6 +37,14 @@ python3 -m http.server 8000 --bind 127.0.0.1 --directory dist
 
 `dist/JanPon.html` はCSS・JavaScript・SVGを含む単一HTMLです。実行時にCDNや外部の画像・音声ファイルを必要としません。ただし、ファイルを直接開く `file://` 方式は動作確認の対象としていません。上記のローカルHTTPサーバー、またはHTTPSで配信してください。Web Locksには[安全なコンテキスト](https://w3c.github.io/webappsec-secure-contexts/#is-origin-trustworthy)が必要です。
 
+## GitHub Pagesで公開する
+
+初回のみ、管理者がリポジトリの **Settings → Pages → Build and deployment → Source** を **GitHub Actions** に設定してください。
+
+その後は `main` への更新で `Publish JanPon to GitHub Pages` が自動実行されます。Actions画面から手動実行もできます。Node.js 24で依存物をロックファイルどおりに導入し、ビルド・自動検証後、ゲーム本体だけを `index.html` として配信します。生成コードや検証用ファイルは配信しません。
+
+公開URLは成功したActions実行の `github-pages` 環境に表示されます。初回設定前に実行が失敗した場合は、設定後にActions画面から再実行してください。サイトはインターネット上に公開されます。
+
 ## 保存とブラウザの制約
 
 - 残高、進行中のラウンド、確定結果、精算状態をローカル保存します。クラウド同期・バックアップ・ファイル入出力はありません
