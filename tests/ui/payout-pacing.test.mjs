@@ -23,17 +23,17 @@ const noSaveScene = ui => {
   assert.doesNotMatch(ui.ids.get('status').textContent,/保存と進行|保存中|保存を確定/);
 };
 
-test('all five prizes have a finite quantity-matched coin release and exact slower normal/muted timing', async t => {
+test('all five prizes show only the matching window and numeral for the exact slower normal/muted timing', async t => {
   for (const [amount, duration] of Object.entries(durations)) for (const muted of [false,true]) {
     const payout=Number(amount), state=savedResult(payout), ui=await startBundle({savedState:state}); t.after(()=>ui.close());
     if(muted) ui.click('#audio-toggle');
     assert.equal(center(ui).dataset.scene,'roulette'); assert.equal(ui.document.querySelectorAll('.center-ejected-coin').length,0);
     await ui.tick(1349); assert.equal(ui.ids.get('prize').textContent,''); assert.equal(ui.writes,0);
     await ui.tick(1); assert.equal(center(ui).dataset.scene,'payout'); assert.equal(center(ui).dataset.payoutMotion,'release');
-    const coins=ui.document.querySelectorAll('.center-ejected-coin'); assert.equal(coins.length,payout);
-    const schedules=coins.map(coin => [...coin.getAttribute('style').matchAll(/--coin-(?:flight|delay):([\d.]+)ms/g)].map(match=>Number(match[1])));
-    assert.equal(schedules[0][1],0); assert.ok(Math.abs(schedules.at(-1).reduce((a,b)=>a+b)-duration)<1e-8);
-    assert.ok(schedules.every(([flight,delay],i)=>flight>0 && delay>=0 && (i===0 || delay>schedules[i-1][1])));
+    assert.equal(ui.document.querySelectorAll('.center-coins, .center-ejected-coin').length,0);
+    assert.ok(center(ui).querySelector('.center-scene').children.every(child=>child.localName==='defs'));
+    assert.equal(ui.ids.get('prize').textContent,String(payout));
+    assert.deepEqual(ui.lamps.filter(lamp=>lamp.classList.contains('active')).map(lamp=>lamp.dataset.value),[String(payout)]);
     await ui.tick(duration-1); assert.deepEqual(ui.savedState,state); assert.equal(ui.ids.get('balance').textContent,'9');
     ui.click('#coin-input'); ui.hands.forEach(button=>ui.click(button)); assert.equal(ui.writes,0); noSaveScene(ui);
     await ui.tick(1); assert.equal(ui.elapsed,1350+duration); assert.equal(ui.savedState.balance,9+payout);
@@ -101,7 +101,7 @@ test('interrupting any extended payout leaves a committed result to replay exact
   }
 });
 
-test('late reduced-motion toggles use one static450ms hold and cannot restart falling coins when switched back', async t => {
+test('late reduced-motion toggles use one static450ms hold with no coin drawing when switched back', async t => {
   for(const time of [0,1350,1801,3500]) {
     const ui=await startBundle({savedState:savedResult(20)}); t.after(()=>ui.close()); await ui.tick(time);
     ui.click('#motion-toggle'); await ui.flush(); assert.equal(center(ui).dataset.payoutMotion,'static'); assert.equal(ui.timers.size,1);
@@ -110,8 +110,7 @@ test('late reduced-motion toggles use one static450ms hold and cannot restart fa
     await ui.tick(449); assert.equal(ui.savedState.balance,9); await ui.tick(1); assert.equal(ui.savedState.balance,29); assert.equal(ui.writes,1);
   }
   const css=await readFile('game/style.css','utf8');
-  assert.match(css,/data-payout-motion="static"[^}]*\.center-ejected-coin\{animation:none;opacity:0\}/);
-  assert.match(css,/\.center-ejected-coin\{opacity:0;animation:center-coin-release var\(--coin-flight\) ease-in var\(--coin-delay\) 1 both\}/);
+  assert.doesNotMatch(css,/center-coins|center-ejected-coin|center-coin-release|--coin-flight|--coin-delay/);
   assert.doesNotMatch(css,/data-scene="saving"/);
 });
 

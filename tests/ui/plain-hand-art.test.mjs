@@ -21,7 +21,7 @@ test('normal center scenes contain no bottom guidance badges/arrows and fast SVG
   for(const scene of ['draw','win','loss','roulette','payout']) {
     const markup=centralScene(scene,win);
     assert.doesNotMatch(markup,/center-badge|center-insert|m110 113|translate\(94 132\)/);
-    if(scene==='payout') assert.match(markup,/center-coins/);
+    if(scene==='payout') assert.doesNotMatch(markup,/center-coins|center-ejected-coin|<ellipse|center-result-hand|center-orbit/);
     else assert.match(markup,/center-result-hand/);
   }
 });

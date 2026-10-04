@@ -66,7 +66,6 @@ button.wallet::before{display:none}button.wallet:disabled{opacity:1;cursor:defau
 .center-cycle .center-hand,.center-result-hand{transform:translate(var(--hand-x),var(--hand-y)) scale(1.05)}
 .center-cycle .center-hand{opacity:0}
 .center-cycle .center-rock{opacity:1}
-.center-coins{fill:none;stroke:currentColor;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
 .center-progress{fill:currentColor;opacity:.7}
 .center-orbit{transform-box:fill-box;transform-origin:center;opacity:.58}
 .state-indicator[data-scene="waiting"] .center-rock{animation:center-rock-cycle 4.8s ease-in-out infinite}
@@ -78,8 +77,6 @@ button.wallet::before{display:none}button.wallet:disabled{opacity:1;cursor:defau
 /* A draw holds the actual hand still until the single shared restart cue. */
 .state-indicator[data-scene="loss"] .center-result-hand{opacity:.62}
 .state-indicator[data-scene="roulette"] .center-orbit{animation:center-orbit 4.8s linear infinite}
-.state-indicator[data-payout-motion="static"] .center-ejected-coin{animation:none;opacity:0}
-.center-ejected-coin{opacity:0;animation:center-coin-release var(--coin-flight) ease-in var(--coin-delay) 1 both}
 .state-indicator[data-scene="loading"] .center-progress{animation:center-breathe 2.4s ease-in-out infinite}
 .state-indicator[data-scene="stopped"],.state-indicator[data-scene="other-tab"],.state-indicator[data-scene="closed"]{color:#ffd79c}
 .state-controls .tool{width:44px;height:44px;min-width:44px;background:linear-gradient(#e4d1a3,#b8a074);border:2px solid #827050;box-shadow:0 3px 0 #463e2d,inset 0 1px 0 #f9eac4;color:#3c3628}
@@ -87,7 +84,6 @@ button.wallet::before{display:none}button.wallet:disabled{opacity:1;cursor:defau
 @keyframes center-rock-cycle{0%,26%,100%{opacity:1}32%,94%{opacity:0}}
 @keyframes center-scissors-cycle{0%,26%,66%,100%{opacity:0}34%,58%{opacity:1}}
 @keyframes center-paper-cycle{0%,58%,100%{opacity:0}66%,92%{opacity:1}}
-@keyframes center-coin-release{0%{opacity:0;transform:translateY(-22px)}12%,80%{opacity:1}100%{opacity:0;transform:translateY(16px)}}
 @keyframes center-breathe{0%,100%{opacity:.55}50%{opacity:.95}}
 @keyframes center-orbit{to{transform:rotate(360deg)}}
 /* Every reduced-motion state has a stationary, shape-distinct equivalent. */

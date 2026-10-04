@@ -1,4 +1,4 @@
-import { EFFECTS, SPEC } from '../spec.ts';
+import { SPEC } from '../spec.ts';
 import type { AppStatus, GameView, Hand } from '../core/game-contracts.ts';
 
 /** Visual-only scene names. These are not stored phases or gameplay state. */
@@ -56,16 +56,7 @@ export function centralScene(scene: CenterScene, view: GameView | null): string 
     content = hand(view.result.opponent, 'center-result-hand');
     if (scene === 'roulette') content += '<circle class="center-orbit" cx="110" cy="100" r="62" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="14 18"/>';
   }
-  if (scene === 'payout') {
-    const amount = view?.result?.payout ?? 0;
-    const duration = EFFECTS.payoutDurationMs[amount as keyof typeof EFFECTS.payoutDurationMs];
-    const flight = amount === 1 ? duration : EFFECTS.coinFlightMs;
-    const coins = duration ? Array.from({ length: amount }, (_, index) => {
-      const delay = amount === 1 ? 0 : (duration - flight) * index / (amount - 1);
-      return `<g class="center-ejected-coin" style="--coin-flight:${flight}ms;--coin-delay:${delay}ms"><ellipse cx="110" cy="103" rx="14" ry="5"/><path d="M96 103v5c0 7 28 7 28 0v-5"/></g>`;
-    }).join('') : '';
-    content = `<g class="center-coins"><ellipse cx="110" cy="65" rx="29" ry="11"/><path d="M81 65v20c0 15 58 15 58 0V65M81 75c0 15 58 15 58 0M81 85c0 15 58 15 58 0"/>${coins}</g>`;
-  }
+  // Payout uses only the selected prize window and the separate numeric output.
   const notice: Partial<Record<CenterScene, CenterIcon>> = { loading: 'hourglass', 'game-over': 'flag', stopped: 'saveError', 'other-tab': 'tabs', closed: 'blocked' };
   const noticeIcon = notice[scene];
   if (noticeIcon) content = `<g class="center-notice" transform="translate(78 38) scale(2)">${iconPath(noticeIcon)}</g>`;
