@@ -20,7 +20,7 @@ test('liked waiting hand art and animation keyframes remain unchanged after appr
   assert.equal(sha(protectedLines.join('\n')),'bb6650725843f8f7f1b390e5426cf62e64039800c6addcf3f691f82d57f191d0');
 });
 
-test('choosing and draw-ready share the complete waiting SVG and identical keyframes, with only 10x period difference', async () => {
+test('choosing and draw-ready share the complete waiting SVG and identical keyframes, with only 16x period difference', async () => {
   const css=await readFile('game/style.css','utf8'), waiting=cycle(centralScene('waiting',idle));
   assert.ok(waiting);
   assert.deepEqual([...waiting.matchAll(/data-center-hand="([^"]+)"/g)].map(match=>match[1]),['rock','scissors','paper']);
@@ -33,11 +33,11 @@ test('choosing and draw-ready share the complete waiting SVG and identical keyfr
     assert.doesNotMatch(markup,/center-choices|center-result-hand|data-hand=/);
     for (const hand of ['rock','scissors','paper']) {
       const rule=css.split('\n').find(line=>line.includes(`[data-scene="${scene}"] .center-${hand}`));
-      assert.ok(rule); assert.match(rule,new RegExp(`animation:center-${hand}-cycle \\.48s ease-in-out infinite`));
+      assert.ok(rule); assert.match(rule,new RegExp(`animation:center-${hand}-cycle \\.30s ease-in-out infinite`));
       assert.equal((css.match(new RegExp(`@keyframes center-${hand}-cycle`,'g'))??[]).length,1);
     }
   }
-  assert.equal(4.8/.48,10);
+  assert.equal(4.8/.30,16);
 });
 
 test('the faster choices never replace committed hand results, roulette or payout scenes', () => {

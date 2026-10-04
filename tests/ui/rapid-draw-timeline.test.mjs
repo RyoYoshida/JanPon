@@ -154,9 +154,9 @@ test('rapid choices use unchanged idle fades with no added backlight, inversion,
   for(const hand of ['rock','scissors','paper']) {
     const waiting=css.split('\n').find(line=>line.includes(`[data-scene="waiting"] .center-${hand}`)).split('{')[1];
     const choosing=css.split('\n').find(line=>line.includes(`[data-scene="choosing"] .center-${hand}`)).split('{')[1];
-    assert.equal(choosing.replace('.48s','4.8s'),waiting);
+    assert.equal(choosing.replace('.30s','4.8s'),waiting);
   }
-  const fastRules=css.split('\n').filter(line=>line.includes('.48s'));
+  const fastRules=css.split('\n').filter(line=>line.includes('.30s'));
   assert.equal(fastRules.length,3); assert.ok(fastRules.every(line=>line.includes('] .center-')));
-  assert.equal(4.8/.48,10);
+  assert.equal(4.8/.30,16);
 });

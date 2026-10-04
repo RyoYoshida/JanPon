@@ -194,7 +194,7 @@ test('central CSS retains slow waiting and static reduced fallbacks while sharin
   assert.match(css,/center-orbit 4\.8s linear infinite/);
   assert.doesNotMatch(css,/steps\(/);
   const durations = [...css.matchAll(/animation:([\w-]+)\s+([\d.]+)(ms|s)/g)].map(([,name,value,unit]) => ({name,ms:Number(value) * (unit === 's' ? 1000 : 1)}));
-  assert.ok(durations.length >= 9); assert.ok(durations.every(({name,ms}) => ms === 480 ? /^center-(rock|scissors|paper)-cycle$/.test(name) : ms >= 1800));
+  assert.ok(durations.length >= 9); assert.ok(durations.every(({name,ms}) => ms === 300 ? /^center-(rock|scissors|paper)-cycle$/.test(name) : ms >= 1800));
   assert.match(css,/\.machine\[data-motion="reduced"\] \.center-scene \*\{animation:none!important\}/);
   assert.match(css,/@media\(prefers-reduced-motion:reduce\)/);
   assert.match(css,/data-motion="reduced"[^}]+transform:translate\(var\(--trio-x\),var\(--trio-y\)\) scale\(\.72\)/);

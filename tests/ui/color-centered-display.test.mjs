@@ -111,7 +111,7 @@ test('idle, choosing, draw and all result hands share centered transforms withou
   }
   assert.equal(centralScene('waiting',idle),centralScene('choosing',idle));assert.equal(centralScene('choosing',idle),centralScene('draw-ready',idle));
   const orbit=centralScene('roulette',win);assert.match(orbit,/class="center-orbit" cx="110" cy="100" r="62"/);
-  for(const hand of hands){assert.match(css,new RegExp(`center-${hand}-cycle 4\\.8s ease-in-out infinite`));assert.match(css,new RegExp(`center-${hand}-cycle \\.48s ease-in-out infinite`));}
+  for(const hand of hands){assert.match(css,new RegExp(`center-${hand}-cycle 4\\.8s ease-in-out infinite`));assert.match(css,new RegExp(`center-${hand}-cycle \\.30s ease-in-out infinite`));}
   assert.match(css,/#prize\{[^}]*bottom:23%/);assert.match(css,/\.state-controls\{[^}]*top:54%/);
 });
 

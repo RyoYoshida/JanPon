@@ -72,9 +72,9 @@ button.wallet::before{display:none}button.wallet:disabled{opacity:1;cursor:defau
 .state-indicator[data-scene="waiting"] .center-rock{animation:center-rock-cycle 4.8s ease-in-out infinite}
 .state-indicator[data-scene="waiting"] .center-scissors{animation:center-scissors-cycle 4.8s ease-in-out infinite}
 .state-indicator[data-scene="waiting"] .center-paper{animation:center-paper-cycle 4.8s ease-in-out infinite}
-.state-indicator[data-scene="choosing"] .center-rock,.state-indicator[data-scene="draw-ready"] .center-rock{animation:center-rock-cycle .48s ease-in-out infinite}
-.state-indicator[data-scene="choosing"] .center-scissors,.state-indicator[data-scene="draw-ready"] .center-scissors{animation:center-scissors-cycle .48s ease-in-out infinite}
-.state-indicator[data-scene="choosing"] .center-paper,.state-indicator[data-scene="draw-ready"] .center-paper{animation:center-paper-cycle .48s ease-in-out infinite}
+.state-indicator[data-scene="choosing"] .center-rock,.state-indicator[data-scene="draw-ready"] .center-rock{animation:center-rock-cycle .30s ease-in-out infinite}
+.state-indicator[data-scene="choosing"] .center-scissors,.state-indicator[data-scene="draw-ready"] .center-scissors{animation:center-scissors-cycle .30s ease-in-out infinite}
+.state-indicator[data-scene="choosing"] .center-paper,.state-indicator[data-scene="draw-ready"] .center-paper{animation:center-paper-cycle .30s ease-in-out infinite}
 /* A draw holds the actual hand still until the single shared restart cue. */
 .state-indicator[data-scene="loss"] .center-result-hand{opacity:.62}
 .state-indicator[data-scene="roulette"] .center-orbit{animation:center-orbit 4.8s linear infinite}
