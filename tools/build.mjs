@@ -9,8 +9,13 @@ export async function build(root = process.cwd()) {
   const registrationFiles = files.filter(p => p.endsWith('.registration.ts'));
   if (!registrationFiles.length) throw new Error('No registration modules discovered');
   await mkdir(resolve(root, '.generated'), { recursive: true });
+  const extensionFiles = files.filter(p => p.endsWith('.extension.ts'));
   const imports = registrationFiles.map((p, i) => `import { registration as r${i} } from ${JSON.stringify('../' + relative(root, p).replaceAll('\\', '/'))};`);
-  await writeFile(resolve(root, '.generated/registrations.ts'), `${imports.join('\n')}\nexport const registrations = [${registrationFiles.map((_, i) => `r${i}`).join(',')}];\n`);
+  const extensionImports = extensionFiles.map((p, i) => `import { extension as e${i} } from ${JSON.stringify('../' + relative(root, p).replaceAll('\\', '/'))};`);
+  const rows = `[${registrationFiles.map((_, i) => `r${i}`).join(',')}]`;
+  const linked = extensionFiles.length ? `connectExtensions(${rows}, [${extensionFiles.map((_, i) => `e${i}`).join(',')}])` : rows;
+  const resolver = extensionFiles.length ? `import { connectExtensions } from '../src/core/extensions.ts';\n` : '';
+  await writeFile(resolve(root, '.generated/registrations.ts'), `${imports.join('\n')}\n${extensionImports.join('\n')}\n${resolver}export const registrations = ${linked};\n`);
   const entry = resolve(root, 'src/bootstrap/main.ts');
   const generatedEntry = resolve(root, '.generated/main.ts');
   const entries = files.includes(entry) ? [generatedEntry] : [];

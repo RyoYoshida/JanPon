@@ -4,7 +4,7 @@ import { readFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import vm from 'node:vm';
 test('self-contained game artifact matches its manifest and JavaScript parses',async()=>{
- const html=await readFile('dist/JanPon-stage7.html','utf8'),manifest=JSON.parse(await readFile('dist/JanPon-stage7.manifest.json','utf8'));
+ const html=await readFile('dist/JanPon.html','utf8'),manifest=JSON.parse(await readFile('dist/JanPon.manifest.json','utf8'));
  assert.equal(createHash('sha256').update(html).digest('hex'),manifest.sha256);
  assert.ok(html.includes(`name="janpon-source-sha256" content="${manifest.sourceSha256}"`));
  assert.doesNotMatch(html,/<script[^>]+src=|<link[^>]+stylesheet/);

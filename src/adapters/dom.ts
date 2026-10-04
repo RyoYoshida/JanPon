@@ -30,6 +30,8 @@ export function createDisplay(root: Document): {
   render(view: GameView | null, status: AppStatus, reason: string): void;
   bind(choose: (index: number) => void, retry: () => void): void;
   animate(view: GameView): Promise<void>;
+  request(choice: Choice): void;
+  finishPresentation(): Promise<void>;
 } {
   function find<T extends Element>(selector: string): T {
     const element = root.querySelector<T>(selector);
@@ -49,16 +51,28 @@ export function createDisplay(root: Document): {
   let current: GameView | null = null, appStatus: AppStatus = 'new', generation = 0;
   let claimed = false, choose: (index: number) => void = () => {}, retry: () => void = () => {};
   let timer: number | null = null, wake: (() => void) | null = null;
+  let finishing: Promise<void> | null = null;
   function cancel(): void {
     generation++;
     if (timer !== null) clock!.clearTimeout(timer);
-    timer = null; wake?.(); wake = null;
+    timer = null; wake?.(); wake = null; finishing = null;
   }
   function sleep(duration: number): Promise<void> {
     return new Promise(resolve => { wake = resolve; timer = clock!.setTimeout(() => { timer = null; wake = null; resolve(); }, duration); });
   }
   function light(index: number): void { lamps.forEach((lamp, i) => lamp.classList.toggle('active', i === index)); }
   function disableInputs(): void { coin.disabled = true; restart.disabled = true; hands.forEach(button => { button.disabled = true; }); }
+  function revealPrize(view: GameView): void {
+    if (!view.result) return;
+    const stop = lamps.findIndex(lamp => lamp.dataset.value === String(view.result!.payout));
+    light(stop); prize.textContent = String(view.result.payout);
+    prize.style.color = lamps[stop]?.getAttribute('fill') ?? '';
+  }
+  function enableHands(): void {
+    claimed = false;
+    hands.forEach(button => { button.disabled = !current?.choices.some(choice => choice.kind === 'hand' && choice.hand === button.dataset.hand); });
+  }
+
   function activate(expected: Choice): void {
     if (appStatus !== 'ready' || claimed || !current) return;
     const index = current.choices.findIndex(choice => choice.kind === expected.kind && (choice.kind !== 'hand' || expected.kind === 'hand' && choice.hand === expected.hand));
@@ -131,23 +145,36 @@ export function createDisplay(root: Document): {
     claimed = true; disableInputs();
     if (result.outcome !== 'win') {
       await sleep(result.outcome === 'draw' ? ENGINE.drawDurationMs : ENGINE.resultDurationMs);
-      if (run === generation && result.outcome === 'draw') {
-        claimed = false;
-        hands.forEach(button => { button.disabled = !current?.choices.some(choice => choice.kind === 'hand' && choice.hand === button.dataset.hand); });
+      if (run !== generation) { await finishing; return; }
+      if (result.outcome === 'draw') {
+        enableHands();
       }
       return;
     }
     let step = 0;
     for (let elapsed = 0; elapsed < ENGINE.resultDurationMs - ENGINE.drawDurationMs; elapsed += ENGINE.lampStepMs) {
-      if (run !== generation) return;
+      if (run !== generation) { await finishing; return; }
       light(step % lamps.length); step++;
       await sleep(ENGINE.lampStepMs);
     }
-    if (run !== generation) return;
-    const stop = lamps.findIndex(lamp => lamp.dataset.value === String(result.payout));
-    light(stop); prize.textContent = String(result.payout);
-    prize.style.color = lamps[stop]?.getAttribute('fill') ?? '';
+    if (run !== generation) { await finishing; return; }
+    revealPrize(view);
     await sleep(ENGINE.drawDurationMs);
+    if (run !== generation) await finishing;
   }
-  return { render, bind(onChoose, onRetry) { choose = onChoose; retry = onRetry; }, animate };
+  function finishPresentation(): Promise<void> {
+    if (finishing) return finishing;
+    cancel();
+    if (appStatus !== 'ready' || !current?.result || current.phase !== 'result' && current.result.outcome !== 'draw') return Promise.resolve();
+    if (current.result.outcome === 'win' && current.phase === 'result') {
+      revealPrize(current);
+    }
+    claimed = true; disableInputs();
+    const run = generation;
+    finishing = sleep(ENGINE.drawDurationMs).then(() => {
+      if (run === generation && current?.result?.outcome === 'draw' && current.phase === 'choosing') enableHands();
+    });
+    return finishing;
+  }
+  return { render, bind(onChoose, onRetry) { choose = onChoose; retry = onRetry; }, animate, request: activate, finishPresentation };
 }

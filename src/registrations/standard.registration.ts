@@ -4,5 +4,5 @@ import type { Registration } from '../core/contracts.ts';
 
 export const registration: Registration = {
   axis: 'A5', id: 'standard', priority: SPEC.defaultPriority,
-  status: 'minimal', implementation: (present: (view: GameView) => Promise<void>) => ({ present }), taskIds: ['T07-04'],
+  status: 'minimal', implementation: (host: { animate(view: GameView): Promise<void> }) => ({ applicable: () => true, present: (view: GameView) => host.animate(view) }), taskIds: ['T07-04'],
 };

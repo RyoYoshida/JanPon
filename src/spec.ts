@@ -46,3 +46,10 @@ export const ENGINE = {
   stateKey: 'current',
   lockName: 'janpon-v1-owner',
 } as const;
+
+/** Provisional presentation tuning; no rule, payout, or accounting authority. */
+export const EFFECTS = {
+  audioDurationSeconds: 0.12, audioGain: 0.045, audioFloor: 0.001,
+  frequencies: { start: 440, draw: 330, win: 660, loss: 220, payout: 880 },
+  selectedPriority: 1,
+} as const;

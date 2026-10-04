@@ -37,7 +37,7 @@ try {
  if (!report.applicationRounds.some(row=>row.completed>=10000 && row.replayed>=10000 && row.exceptions===0 && row.invariantViolations===0)) throw new Error('Missing real application round/replay evidence');
  report.testSummary = Object.fromEntries([...run.stdout.matchAll(/^# (tests|pass|fail|cancelled|skipped|todo) (\d+)$/gm)].map(m=>[m[1],Number(m[2])]));
  report.pending = registrations.filter(row=>row.status==='unimplemented').map(row=>({id:row.id,axis:row.axis,tasks:row.taskIds,status:row.status}));
- report.productCompletion = 'NOT_READY: remaining registrations, real-device/recovery matrix and 100000-round completion verification pending';
+ report.productCompletion = 'NOT_READY: full real-device/recovery matrix and 100000-round completion verification are not implemented by this command';
  if(mode==='checkpoint') {
   const faults=spawnSync(process.execPath,['tools/fault-injection.mjs'],{encoding:'utf8',timeout:3500000});
   process.stdout.write(faults.stdout??''); process.stderr.write(faults.stderr??'');
