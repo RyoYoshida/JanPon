@@ -27,8 +27,9 @@ test('apron settings form one text-free group inside the red cabinet, outside th
     assert.ok(button.getAttribute('aria-label'));
     assert.equal(button.getAttribute('aria-pressed'), 'false');
   }
-  assert.ok(ui.ids.get('state-symbol').closest('.face .state-controls'));
-  assert.match(ui.ids.get('state-symbol').innerHTML, /<svg/);
+  assert.equal(ui.ids.has('state-symbol'), false);
+  assert.ok(ui.ids.get('state-indicator').closest('.display'));
+  assert.match(ui.ids.get('state-indicator').innerHTML, /<svg/);
 });
 
 test('apron settings use responsive flow, large physical rocker targets, distinct states and visible focus', async () => {
@@ -88,12 +89,12 @@ test('outer settings preserve modifier and composition guards without claiming u
   await ui.flush(); assert.deepEqual(ui.savedState, before);
 });
 
-test('lower-left status and non-destructive retry remain visible when saved data cannot be restored', async t => {
+test('central status and non-destructive retry remain available when saved data cannot be restored', async t => {
   const damaged = { schema: 'corrupt-save', balance: 10 };
   const ui = await startBundle({ savedState: damaged }); t.after(() => ui.close());
   assert.equal(ui.machine.dataset.phase, 'stopped');
-  assert.ok(ui.ids.get('state-symbol').closest('.face .state-controls'));
-  assert.match(ui.ids.get('state-symbol').innerHTML, /<svg/);
+  assert.equal(ui.ids.has('state-symbol'), false);
+  assert.ok(ui.ids.get('state-indicator').closest('.display'));
   assert.match(ui.ids.get('state-indicator').innerHTML, /<svg/);
   assert.match(ui.ids.get('status').textContent, /保存は消しません/);
   assert.equal(ui.ids.get('retry').hidden, false); assert.equal(ui.ids.get('retry').disabled, false);

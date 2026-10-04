@@ -53,7 +53,7 @@ test('T07-04 live shell preserves the approved 100 lamp art and broad coin-only 
   assert.equal((html.match(/data-hand=/g) ?? []).length, 3);
   assert.match(html, /<button id="coin-input"[^>]*type="button"[^>]*>[\s\S]*id="coin-target"[\s\S]*id="balance"[\s\S]*<\/button>/);
   assert.match(css, /button\.wallet\{[^}]*min-width:120px;min-height:56px[^}]*padding:12px/);
-  assert.doesNotMatch(html + css, /palette|scenario-buttons|reset-demo|sound|motion|dialog/);
+  assert.doesNotMatch(html + css, /palette|scenario-buttons|reset-demo|dialog/);
   const surface = html.replace(/<p[^>]*class="sr-only"[^>]*>[\s\S]*?<\/p>/g, '').replace(/<head>[\s\S]*?<\/head>/, '');
   const text = [...surface.matchAll(/>([^<>]+)</g)].map(m => m[1].trim()).filter(Boolean);
   assert.ok(text.every(value => value === 'JanPon' || /^\d+$/.test(value)), text.join(','));
@@ -95,7 +95,7 @@ test('T07-04 loading, game over, errors and other-tab explain state without enab
 test('T07-04 outcomes show Japanese labels and distinct symbols; draws remain free choosing', async () => {
   const h = harness(), symbols = new Set();
   for (const view of [idle, choosing, draw, win, { ...win, result: { ...win.result, outcome: 'loss', payout: 0 } }]) {
-    h.ui.render(view, 'ready', ''); symbols.add(h.ids.get('state-symbol').innerHTML);
+    h.ui.render(view, 'ready', ''); symbols.add(h.ids.get('state-indicator').innerHTML);
     if (view.result) assert.match(h.ids.get('status').textContent, /あなたはグー、相手は/);
   }
   assert.equal(symbols.size, 5);

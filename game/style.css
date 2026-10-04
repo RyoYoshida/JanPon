@@ -35,12 +35,12 @@ button svg{position:relative;width:58%;height:58%;overflow:visible;filter:drop-s
 #balance{min-width:57px;text-align:center;padding:5px 7px;border-radius:5px;background:#272b22;border:2px solid #685e43;color:#f7d578;font:700 27px/1 monospace;box-shadow:inset 0 2px 5px #0005}
 .sr-only{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
 [hidden]{display:none!important}.tool{width:40px;height:40px;min-width:40px;aspect-ratio:1;border-radius:50%;background:#f8e7b7;box-shadow:0 2px 0 #94684855;border:1px solid #b18d5e;color:#684b30;cursor:pointer}.tool::before{display:none}.tool svg{width:24px;height:24px;filter:none}.tool:focus-visible{outline:3px solid #a9782b;outline-offset:3px}.tool:disabled{opacity:.28;cursor:default}
-.state-controls{position:absolute;left:21px;bottom:29px;display:flex;align-items:center;gap:10px}.state-controls #state-symbol{width:24px;height:24px;color:#9b783d}.state-controls svg{width:100%;height:100%}.state-controls .tool svg{width:24px;height:24px}
-.state-indicator{position:absolute;left:50%;top:43%;width:70px;height:70px;transform:translate(-50%,-50%);color:#ffcb6e;filter:drop-shadow(0 0 5px #edb04b55)}.state-indicator svg{width:100%;height:100%}.display.problem{box-shadow:inset 0 0 25px #862c1633}
+.state-controls{position:absolute;left:50%;top:64%;transform:translateX(-50%);display:flex;align-items:center;gap:10px;z-index:2}.state-controls svg{width:100%;height:100%}.state-controls .tool svg{width:24px;height:24px}
+.state-indicator{position:absolute;left:50%;top:49%;width:66%;height:60%;transform:translate(-50%,-50%);color:#ffc369;filter:drop-shadow(0 0 3px #edb04b33);pointer-events:none}.state-indicator svg{width:100%;height:100%}.display.problem{box-shadow:inset 0 0 25px #862c1633}
 /* Coin-only activation: the padded native button preserves the approved art position. */
 button.wallet{width:max-content;max-width:100%;min-width:120px;min-height:56px;height:auto;aspect-ratio:auto;display:flex;justify-content:flex-end;align-items:center;gap:8px;margin:11px -12px -12px auto;padding:12px;border:0;border-radius:12px;background:transparent;box-shadow:none;color:inherit;cursor:pointer}
 button.wallet::before{display:none}button.wallet:disabled{opacity:1;cursor:default}button.wallet svg{position:static;width:32px;height:32px;filter:none}button.wallet:focus-visible{outline:3px solid #a9782b;outline-offset:2px}
-@media(max-width:420px){.key{gap:15px;font-size:11px}button.wallet{margin-top:8px}.state-controls{left:15px;bottom:26px}}
+@media(max-width:420px){.key{gap:15px;font-size:11px}button.wallet{margin-top:8px}}
 /* Hardware settings occupy the red lower apron, never the white face or coin target. */
 .settings-controls{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:16px;margin-top:20px;padding:0 4px}
 .settings-controls .tool{width:54px;height:58px;min-width:54px;flex-shrink:0;border:2px solid #762018;border-radius:10px;background:#74251e;box-shadow:inset 0 2px 4px #350c09,0 1px 0 #ff7d5f;color:#e8d4a8}
@@ -53,3 +53,214 @@ button.wallet::before{display:none}button.wallet:disabled{opacity:1;cursor:defau
 .settings-controls .tool[aria-pressed="true"] svg{transform:translateY(3px)}
 .settings-controls .tool:active{transform:translateY(1px)}
 .settings-controls .tool:focus-visible{outline:3px solid #fff0b8;outline-offset:4px}
+
+/* Central LED scenes: decorative cycles never schedule or advance a game action. */
+.center-scene{display:block;width:100%;height:100%;overflow:visible}
+.center-hand{transform-origin:0 0}
+.center-cycle .center-hand,.center-result-hand{transform:translate(62px,20px) scale(1.05)}
+.center-cycle .center-hand{opacity:0}
+.center-cycle .center-rock{opacity:1}
+.center-choices .center-hand{transform:translate(3px,43px) scale(.72)}
+.center-choices .center-scissors{transform:translate(77px,43px) scale(.72)}
+.center-choices .center-paper{transform:translate(151px,43px) scale(.72)}
+.center-badge{opacity:.86}
+.center-coins{fill:none;stroke:currentColor;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+.center-progress{fill:currentColor;opacity:.7}
+.center-orbit{transform-box:fill-box;transform-origin:center;opacity:.58}
+.state-indicator[data-scene="waiting"] .center-rock{animation:center-rock-cycle 4.8s ease-in-out infinite}
+.state-indicator[data-scene="waiting"] .center-scissors{animation:center-scissors-cycle 4.8s ease-in-out infinite}
+.state-indicator[data-scene="waiting"] .center-paper{animation:center-paper-cycle 4.8s ease-in-out infinite}
+.state-indicator[data-scene="waiting"] .center-insert{animation:center-breathe 2.4s ease-in-out infinite}
+.state-indicator[data-scene="choosing"] .center-choices,.state-indicator[data-scene="draw-ready"] .center-choices{animation:center-breathe 2.4s ease-in-out infinite}
+.state-indicator[data-scene="draw"] .center-result-hand{animation:center-nod 1.8s ease-in-out infinite}
+.state-indicator[data-scene="win"] .center-badge{animation:center-breathe 2.4s ease-in-out infinite}
+.state-indicator[data-scene="loss"] .center-result-hand{opacity:.62}
+.state-indicator[data-scene="roulette"] .center-orbit{animation:center-orbit 4.8s linear infinite}
+.state-indicator[data-scene="payout"] .center-coins{animation:center-breathe 2.4s ease-in-out infinite}
+.state-indicator[data-scene="loading"] .center-progress,.state-indicator[data-scene="saving"] .center-progress{animation:center-breathe 2.4s ease-in-out infinite}
+.state-indicator[data-scene="stopped"],.state-indicator[data-scene="other-tab"],.state-indicator[data-scene="closed"]{color:#ffd79c}
+.state-controls .tool{width:44px;height:44px;min-width:44px;background:linear-gradient(#e4d1a3,#b8a074);border:2px solid #827050;box-shadow:0 3px 0 #463e2d,inset 0 1px 0 #f9eac4;color:#3c3628}
+.state-controls .tool:focus-visible{outline:3px solid #ffe5a8;outline-offset:4px}
+@keyframes center-rock-cycle{0%,26%,100%{opacity:1}32%,94%{opacity:0}}
+@keyframes center-scissors-cycle{0%,26%,66%,100%{opacity:0}34%,58%{opacity:1}}
+@keyframes center-paper-cycle{0%,58%,100%{opacity:0}66%,92%{opacity:1}}
+@keyframes center-breathe{0%,100%{opacity:.55}50%{opacity:.95}}
+@keyframes center-nod{0%,100%{transform:translate(62px,20px) scale(1.05)}50%{transform:translate(62px,24px) scale(1.05)}}
+@keyframes center-orbit{to{transform:rotate(360deg)}}
+/* Every reduced-motion state has a stationary, shape-distinct equivalent. */
+.machine[data-motion="reduced"] .center-scene *{animation:none!important}
+.machine[data-motion="reduced"] .center-cycle .center-hand{opacity:1;transform:translate(3px,43px) scale(.72)}
+.machine[data-motion="reduced"] .center-cycle .center-scissors{transform:translate(77px,43px) scale(.72)}
+.machine[data-motion="reduced"] .center-cycle .center-paper{transform:translate(151px,43px) scale(.72)}
+@media(prefers-reduced-motion:reduce){
+  .machine:not([data-motion="standard"]) .center-scene *{animation:none!important}
+  .machine:not([data-motion="standard"]) .center-cycle .center-hand{opacity:1;transform:translate(3px,43px) scale(.72)}
+  .machine:not([data-motion="standard"]) .center-cycle .center-scissors{transform:translate(77px,43px) scale(.72)}
+  .machine:not([data-motion="standard"]) .center-cycle .center-paper{transform:translate(151px,43px) scale(.72)}
+}
+/* Physical finish only: preserve cabinet geometry, controls and game state styling. */
+.machine {
+  background:
+    radial-gradient(ellipse at 15% 2%, #ef79502e, transparent 36%),
+    radial-gradient(ellipse at 94% 90%, #58271c33, transparent 35%),
+    linear-gradient(90deg, #7b291e40, transparent 4%, transparent 95%, #591e184d),
+    repeating-linear-gradient(101deg, #fff0d903 0 1px, transparent 1px 4px),
+    linear-gradient(115deg, #c83d2d, #c03327 47%, #a62e24);
+  border-color: #713025;
+  box-shadow:
+    inset 0 2px 1px #f1aa81,
+    inset 3px 0 3px #e77854,
+    inset -4px 0 4px #76291f,
+    inset 0 -3px 3px #74291d,
+    0 2px 0 #79271e,
+    0 8px 0 #8b3025,
+    0 11px 0 #592a21,
+    0 14px 3px -1px #422a235e,
+    0 29px 40px -14px #45291d66;
+}
+
+/* Fine rolled edge and a few exposed-metal flecks stay on the outer shell. */
+.machine::before,
+.machine::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+  border-radius: inherit;
+}
+.machine::before {
+  inset: 5px;
+  border: 1px solid #65261a63;
+  box-shadow: 0 1px 0 #f3ab7142, inset 1px 0 0 #f3ab7133;
+}
+.machine::after {
+  inset: 0;
+  background:
+    linear-gradient(104deg, transparent 12%, #bca67b 16% 49%, #6f5640 53% 63%, transparent 67%) 21px 7px / 18px 2px no-repeat,
+    linear-gradient(12deg, transparent 9%, #ccb58b 17% 45%, #713b2a 49% 70%, transparent 79%) right 11px top 72px / 3px 19px no-repeat,
+    linear-gradient(106deg, transparent 15%, #e0bf87 22% 58%, #734c32 65% 73%, transparent 80%) left 8px bottom 87px / 3px 13px no-repeat,
+    linear-gradient(4deg, transparent 5%, #b69b71 17% 65%, transparent 84%) right 34px bottom 6px / 23px 2px no-repeat;
+  opacity: .72;
+}
+
+/* A bolted-on enamel badge, with moulded cream lettering above its face. */
+.machine header::before,
+.machine header::after {
+  content: "";
+  position: absolute;
+  top: calc(50% - 4px);
+  width: 7px;
+  height: 7px;
+  border: 1px solid #765b43;
+  border-radius: 50%;
+  background:
+    linear-gradient(145deg, transparent 39%, #665440 43% 54%, transparent 58%),
+    radial-gradient(circle at 30% 25%, #f0ddae, #b5a17b 47%, #766649 83%);
+  box-shadow: 0 1px 1px #57251b99, 0 0 0 1px #ef9c6155;
+  pointer-events: none;
+}
+.machine header::before { left: 9px; }
+.machine header::after { right: 9px; transform: rotate(28deg); }
+.machine h1 {
+  isolation: isolate;
+  position: relative;
+  z-index: 0;
+  color: #f6e6ad;
+  -webkit-text-stroke: .65px #8d3825;
+  text-shadow:
+    0 -1px 0 #fff5cf,
+    1px 1px 0 #fff2c5,
+    1px 2px 0 #c59d60,
+    2px 3px 0 #b88c50,
+    2px 4px 0 #825232,
+    2px 5px 0 #613223,
+    3px 7px 3px #431d166b;
+}
+.machine h1::before,
+.machine h1::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+}
+.machine h1::before {
+  z-index: -2;
+  inset: -10px -17px -12px;
+  border: 2px solid #c5a477;
+  border-radius: 15px 12px 15px 12px;
+  background:
+    linear-gradient(168deg, #f7cd9020, transparent 40%),
+    linear-gradient(180deg, #b83b2d, #a32c23 58%, #94281f);
+  box-shadow:
+    inset 0 1px 0 #f7dfae,
+    inset 0 0 0 2px #8b482b,
+    inset 0 -2px 3px #69231b,
+    0 1px 0 #7b3b25,
+    1px 3px 0 #7a3423,
+    1px 5px 0 #58281e,
+    2px 7px 5px #62251e69;
+}
+.machine h1::after {
+  z-index: -1;
+  inset: -7px -14px -9px;
+  border-radius: 11px;
+  background:
+    linear-gradient(3deg, transparent 12%, #eed3a166 24% 72%, transparent 83%) 9px 0 / 24px 1px no-repeat,
+    linear-gradient(9deg, transparent 10%, #eacb8c55 28% 64%, transparent 81%) right 4px bottom 1px / 18px 1px no-repeat;
+}
+
+/* Age lives mostly at edges; controls and printed artwork keep their contrast. */
+.machine .face {
+  background:
+    radial-gradient(ellipse at 0 0, #ae7e3826, transparent 36%),
+    radial-gradient(ellipse at 98% 96%, #9b6b3230, transparent 44%),
+    repeating-linear-gradient(91deg, #a7843905 0 1px, transparent 1px 5px),
+    linear-gradient(112deg, #f6ebc5, #ecdcad 67%, #e6d29e);
+  border-color: #73382a;
+  box-shadow:
+    inset 0 2px 1px #fff5d5,
+    inset 2px 0 3px #fff6d259,
+    inset -2px -3px 5px #ad8c5452,
+    0 -1px 1px #62231b99,
+    0 2px 0 #da7048,
+    0 4px 2px #66231f80;
+}
+.machine .face::before {
+  content: "";
+  position: absolute;
+  inset: 6px;
+  border: 1px solid #9d784127;
+  border-top-color: #fff8df77;
+  border-radius: 12px 12px 9px 9px;
+  pointer-events: none;
+}
+.machine .display-rim {
+  background:
+    repeating-linear-gradient(0deg, #fff3cf0a 0 1px, #5b4d3210 1px 2px, transparent 2px 4px),
+    linear-gradient(136deg, #9b8864 0%, #e8d9ae 18%, #bfae86 39%, #766b50 68%, #c8ba93 88%, #e2d3a6 100%);
+  box-shadow:
+    0 -1px 0 #725f4077,
+    0 2px 1px #fff1c8,
+    0 3px 4px #67503055,
+    inset 0 1px 1px #f8eaca,
+    inset 0 -2px 2px #62553d;
+}
+.machine .display {
+  border-color: #39382c #25271f #4b4836 #2b2d23;
+}
+.machine .display::after {
+  background:
+    linear-gradient(125deg, #fff3c809 4%, #fff3c803 24%, transparent 24.5% 67%, #00000012 100%);
+  box-shadow: inset 0 0 22px #0009, inset 0 2px 4px #000c;
+  pointer-events: none;
+}
+.machine .screw {
+  background: radial-gradient(circle at 28% 22%, #e9d7aa, #b9a37c 45%, #73654b 86%);
+  border: 1px solid #796146;
+  box-shadow: 0 1px 1px #58291dcc, 0 0 0 1px #f2a56c44;
+}
+.machine .screw::after {
+  top: 2px;
+  left: 0;
+  background: #64523a;
+  box-shadow: 0 1px 0 #e1c79799;
+  pointer-events: none;
+}
