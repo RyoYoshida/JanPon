@@ -7,8 +7,11 @@
     "node": ">=24.0.0"
   },
   "scripts": {
+    "check": "node tools/verify.mjs",
+    "check:checkpoint": "node tools/verify.mjs --checkpoint",
+    "check:complete": "node tools/verify.mjs --complete",
     "build": "node tools/build.mjs",
-    "test": "node --test tests/foundation/*.test.mjs"
+    "check:faults": "node tools/fault-injection.mjs"
   },
   "devDependencies": {
     "typescript": "5.9.3"

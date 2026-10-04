@@ -1,0 +1,51 @@
+import { spawnSync } from 'node:child_process';
+import { mkdir, writeFile, readFile } from 'node:fs/promises';
+import { resolve } from 'node:path';
+import { createHash } from 'node:crypto';
+import { pathToFileURL } from 'node:url';
+import { performance } from 'node:perf_hooks';
+import { discover } from './discover.mjs';
+import { build } from './build.mjs';
+import { architecture } from './architecture.mjs';
+import { checkGoldens } from './golden-contracts.mjs';
+import { checkManifest } from '../src/core/registry.ts';
+import { AXIS_MANIFEST } from '../src/spec.ts';
+const start = performance.now();
+const mode = process.argv.includes('--complete') ? 'complete' : process.argv.includes('--checkpoint') ? 'checkpoint' : 'everyday';
+const report = { mode, startedUtc:new Date().toISOString(), runtime:process.version, status:'FAIL', browser:'NOT_RUN: automated terminal checks do not run a real browser' };
+try {
+ report.build = await build();
+ report.architecture = await architecture();
+ const { registrations } = await import(pathToFileURL(resolve('dist/.generated/registrations.js')).href + `?run=${start}`);
+ const manifestIssues = checkManifest(registrations);
+ if(manifestIssues.length) throw new Error(manifestIssues.join('\n'));
+ const goal = await readFile('GOAL.md','utf8');
+ const axes = [...goal.matchAll(/^\|A(\d) /gm)].map(match => `A${match[1]}`);
+ if(JSON.stringify(axes)!==JSON.stringify(AXIS_MANIFEST.map(row=>row.axis))) throw new Error('GOAL axis mismatch');
+ report.registrations = { count:registrations.length, axes:axes.length, authority:'GOAL six-axis registration mapping' };
+ report.goldens = await checkGoldens(process.env.JANPON_GOLDEN_PATH);
+ report.goldenSha256 = createHash('sha256').update(await readFile('tests/golden/approved-examples.json')).digest('hex');
+ const tests = [...await discover('tests',p=>/\.test\.(mjs|js|ts)$/.test(p)),...await discover('mock/tests',p=>/\.test\.(mjs|js|ts)$/.test(p))];
+ if(!tests.length) throw new Error('No tests discovered');
+ report.testFiles = tests;
+ const run = spawnSync(process.execPath,['--test','--test-reporter=tap',...tests],{encoding:'utf8',timeout:170000});
+ process.stdout.write(run.stdout??''); process.stderr.write(run.stderr??'');
+ if(run.error || run.status!==0) throw new Error(`Tests failed: ${run.error?.message??run.status}`);
+ report.testSummary = Object.fromEntries([...run.stdout.matchAll(/^# (tests|pass|fail|cancelled|skipped|todo) (\d+)$/gm)].map(m=>[m[1],Number(m[2])]));
+ report.pending = registrations.map(row=>({id:row.id,axis:row.axis,tasks:row.taskIds,status:row.status}));
+ report.productCompletion = 'NOT_READY: gameplay, real persistence, UI, recovery and real-device matrix not yet implemented or verified';
+ if(mode==='checkpoint') {
+  const faults=spawnSync(process.execPath,['tools/fault-injection.mjs'],{encoding:'utf8',timeout:3500000});
+  process.stdout.write(faults.stdout??''); process.stderr.write(faults.stderr??'');
+  if(faults.error || faults.status!==0) throw new Error('Fault-injection checkpoint failed');
+ }
+ report.elapsedMs = Math.round(performance.now()-start);
+ const limit = mode==='checkpoint'?3600000:180000;
+ if(mode!=='complete' && report.elapsedMs>limit) throw new Error('Verification time budget exceeded');
+ report.status = mode==='complete'?'NOT_READY':'PASS';
+ process.exitCode=mode==='complete'?2:0;
+} catch(error) { report.error=error.stack; process.exitCode=1; }
+report.elapsedMs = Math.round(performance.now()-start);
+await mkdir('.verification',{recursive:true});
+await writeFile(`.verification/${mode}.json`,JSON.stringify(report,null,2)+'\n');
+console.log(JSON.stringify(report,null,2));
