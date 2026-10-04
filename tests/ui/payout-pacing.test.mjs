@@ -23,7 +23,7 @@ const noSaveScene = ui => {
   assert.doesNotMatch(ui.ids.get('status').textContent,/保存と進行|保存中|保存を確定/);
 };
 
-test('all five prizes show only the matching window and numeral for the exact slower normal/muted timing', async t => {
+test('all five prizes retain the final hand, matching window and numeral for the exact slower normal/muted timing', async t => {
   for (const [amount, duration] of Object.entries(durations)) for (const muted of [false,true]) {
     const payout=Number(amount), state=savedResult(payout), ui=await startBundle({savedState:state}); t.after(()=>ui.close());
     if(muted) ui.click('#audio-toggle');
@@ -31,7 +31,8 @@ test('all five prizes show only the matching window and numeral for the exact sl
     await ui.tick(1349); assert.equal(ui.ids.get('prize').textContent,''); assert.equal(ui.writes,0);
     await ui.tick(1); assert.equal(center(ui).dataset.scene,'payout'); assert.equal(center(ui).dataset.payoutMotion,'release');
     assert.equal(ui.document.querySelectorAll('.center-coins, .center-ejected-coin').length,0);
-    assert.ok(center(ui).querySelector('.center-scene').children.every(child=>child.localName==='defs'));
+    assert.equal(center(ui).querySelector('.center-result-hand').dataset.centerHand,state.round.result.opponent);
+    assert.equal(center(ui).querySelector('.center-orbit'),null);
     assert.equal(ui.ids.get('prize').textContent,String(payout));
     assert.deepEqual(ui.lamps.filter(lamp=>lamp.classList.contains('active')).map(lamp=>lamp.dataset.value),[String(payout)]);
     await ui.tick(duration-1); assert.deepEqual(ui.savedState,state); assert.equal(ui.ids.get('balance').textContent,'9');

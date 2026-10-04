@@ -52,11 +52,11 @@ export function centralScene(scene: CenterScene, view: GameView | null): string 
   let content = '';
   if (scene === 'waiting') content = trio('center-cycle');
   if (scene === 'choosing' || scene === 'draw-ready') content = trio('center-cycle');
-  if (['draw', 'win', 'loss', 'roulette'].includes(scene) && view?.result) {
+  if (['draw', 'win', 'loss', 'roulette', 'payout'].includes(scene) && view?.result) {
     content = hand(view.result.opponent, 'center-result-hand');
     if (scene === 'roulette') content += '<circle class="center-orbit" cx="110" cy="100" r="62" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="14 18"/>';
   }
-  // Payout uses only the selected prize window and the separate numeric output.
+  // Payout holds the final opponent hand; the selected window and numeric output stay separate.
   const notice: Partial<Record<CenterScene, CenterIcon>> = { loading: 'hourglass', 'game-over': 'flag', stopped: 'saveError', 'other-tab': 'tabs', closed: 'blocked' };
   const noticeIcon = notice[scene];
   if (noticeIcon) content = `<g class="center-notice" transform="translate(78 38) scale(2)">${iconPath(noticeIcon)}</g>`;
