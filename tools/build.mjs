@@ -13,7 +13,7 @@ export async function build(root = process.cwd()) {
   await writeFile(resolve(root, '.generated/registrations.ts'), `${imports.join('\n')}\nexport const registrations = [${registrationFiles.map((_, i) => `r${i}`).join(',')}];\n`);
   await rm(resolve(root, 'dist'), { recursive: true, force: true });
   const options = { strict: true, target: ts.ScriptTarget.ES2023, module: ts.ModuleKind.NodeNext,
-    moduleResolution: ts.ModuleResolutionKind.NodeNext, lib: ['lib.es2023.d.ts'],
+    moduleResolution: ts.ModuleResolutionKind.NodeNext, lib: ['lib.es2023.d.ts', 'lib.dom.d.ts'],
     rootDir: root, outDir: resolve(root, 'dist'), rewriteRelativeImportExtensions: true,
     noEmitOnError: true, noUncheckedIndexedAccess: true };
   const program = ts.createProgram([...files, resolve(root, '.generated/registrations.ts')], options);

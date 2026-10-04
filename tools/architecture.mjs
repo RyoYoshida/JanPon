@@ -7,7 +7,7 @@ const ranks = { spec: 0, core: 1, registrations: 2, application: 2, adapters: 3,
 export async function architecture(root = process.cwd()) {
   const files = await discover(resolve(root, 'src'), p => p.endsWith('.ts'));
   const errors = [], graph = new Map();
-  const program = ts.createProgram(files, { target: ts.ScriptTarget.ES2023, module: ts.ModuleKind.NodeNext, moduleResolution: ts.ModuleResolutionKind.NodeNext, strict: true, lib: ['lib.es2023.d.ts'], allowImportingTsExtensions: true, noEmit: true });
+  const program = ts.createProgram(files, { target: ts.ScriptTarget.ES2023, module: ts.ModuleKind.NodeNext, moduleResolution: ts.ModuleResolutionKind.NodeNext, strict: true, lib: ['lib.es2023.d.ts', 'lib.dom.d.ts'], allowImportingTsExtensions: true, noEmit: true });
   const checker = program.getTypeChecker();
   for (const file of files) {
     const path = relative(resolve(root, 'src'), file).replaceAll('\\', '/');
